@@ -13,6 +13,34 @@ import { generateTimeSeriesData } from "@/lib/chart-data-generator"
 export function ChartsDashboard() {
   const performanceData = generateTimeSeriesData(24, 30, 90)
 
+  const comparisonLabels = Array.from({ length: 24 }, (_, i) => `${i}:00`)
+  const comparisonSeries = [
+    {
+      label: "CPU",
+      data: Array.from({ length: 24 }, () => Math.random() * 80 + 20),
+      color: "#06b6d4",
+    },
+    {
+      label: "内存",
+      data: Array.from({ length: 24 }, () => Math.random() * 70 + 30),
+      color: "#8b5cf6",
+    },
+    {
+      label: "网络",
+      data: Array.from({ length: 24 }, () => Math.random() * 60 + 40),
+      color: "#3b82f6",
+    },
+  ]
+
+  const days = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"]
+  const heatmapData = days.flatMap((day) =>
+    Array.from({ length: 24 }, (_, hour) => ({
+      day,
+      hour,
+      value: Math.floor(Math.random() * 100),
+    })),
+  )
+
   return (
     <div className="grid gap-6">
       <Card className="bg-slate-900/50 border-slate-700/50 backdrop-blur-sm">
@@ -70,7 +98,12 @@ export function ChartsDashboard() {
                     <div className="text-sm font-medium text-slate-300">多指标对比分析</div>
                     <div className="text-xs text-slate-500">实时数据</div>
                   </div>
-                  <AreaComparisonChart />
+                  <AreaComparisonChart
+                    title="系统资源对比"
+                    labels={comparisonLabels}
+                    series={comparisonSeries}
+                    height={300}
+                  />
                 </div>
               </div>
             </TabsContent>
@@ -82,7 +115,7 @@ export function ChartsDashboard() {
                     <div className="text-sm font-medium text-slate-300">24 小时活动热力图</div>
                     <div className="text-xs text-slate-500">按小时统计</div>
                   </div>
-                  <HeatmapChart />
+                  <HeatmapChart title="系统活动热力图" data={heatmapData} />
                 </div>
               </div>
             </TabsContent>

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { BarChart3 } from "lucide-react"
+import { BarChart3 } from "@/lib/icons"
 import { Badge } from "@/components/ui/badge"
 
 interface DataSeries {
@@ -18,17 +18,25 @@ interface AreaComparisonChartProps {
   height?: number
 }
 
-export function AreaComparisonChart({ title, labels, series, height = 300 }: AreaComparisonChartProps) {
+export function AreaComparisonChart({
+  title = "数据对比",
+  labels = [],
+  series = [],
+  height = 300,
+}: AreaComparisonChartProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
     const canvas = canvasRef.current
-    if (!canvas || series.length === 0) return
+    if (!canvas || !series || series.length === 0 || !labels || labels.length === 0) return
 
     const ctx = canvas.getContext("2d")
     if (!ctx) return
 
-    const dpr = window.devicePixelRatio || 1
+    const validSeries = series.filter((s) => s && Array.isArray(s.data) && s.data.length > 0)
+    if (validSeries.length === 0) return
+
+    const dpr = typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1
     const rect = canvas.getBoundingClientRect()
 
     canvas.width = rect.width * dpr
@@ -45,7 +53,7 @@ export function AreaComparisonChart({ title, labels, series, height = 300 }: Are
     ctx.clearRect(0, 0, width, height)
 
     // 获取最大值
-    const maxValue = Math.max(...series.flatMap((s) => s.data))
+    const maxValue = Math.max(...validSeries.flatMap((s) => s.data), 1) // 添加最小值 1 防止除零
 
     // 绘制网格
     ctx.strokeStyle = "rgba(148, 163, 184, 0.1)"
@@ -66,15 +74,16 @@ export function AreaComparisonChart({ title, labels, series, height = 300 }: Are
     }
 
     // 绘制每个数据系列
-    series.forEach((dataSeries) => {
+    validSeries.forEach((dataSeries) => {
       // 渐变填充
       const gradient = ctx.createLinearGradient(0, padding.top, 0, padding.top + chartHeight)
       gradient.addColorStop(0, `${dataSeries.color}30`)
       gradient.addColorStop(1, `${dataSeries.color}00`)
 
       ctx.beginPath()
+      const dataLength = Math.max(dataSeries.data.length - 1, 1) // 防止除零
       dataSeries.data.forEach((value, index) => {
-        const x = padding.left + (chartWidth / (dataSeries.data.length - 1)) * index
+        const x = padding.left + (chartWidth / dataLength) * index
         const y = padding.top + chartHeight - (value / maxValue) * chartHeight
 
         if (index === 0) {
@@ -96,7 +105,7 @@ export function AreaComparisonChart({ title, labels, series, height = 300 }: Are
       ctx.lineWidth = 2
 
       dataSeries.data.forEach((value, index) => {
-        const x = padding.left + (chartWidth / (dataSeries.data.length - 1)) * index
+        const x = padding.left + (chartWidth / dataLength) * index
         const y = padding.top + chartHeight - (value / maxValue) * chartHeight
 
         if (index === 0) {
@@ -114,10 +123,10 @@ export function AreaComparisonChart({ title, labels, series, height = 300 }: Are
     ctx.font = "10px monospace"
     ctx.textAlign = "center"
 
-    const labelStep = Math.ceil(labels.length / 6)
+    const labelStep = Math.max(Math.ceil(labels.length / 6), 1) // 防止除零
     labels.forEach((label, index) => {
       if (index % labelStep === 0 || index === labels.length - 1) {
-        const x = padding.left + (chartWidth / (labels.length - 1)) * index
+        const x = padding.left + (chartWidth / Math.max(labels.length - 1, 1)) * index
         ctx.fillText(label, x, height - 10)
       }
     })
@@ -132,12 +141,14 @@ export function AreaComparisonChart({ title, labels, series, height = 300 }: Are
             {title}
           </CardTitle>
           <div className="flex items-center space-x-2">
-            {series.map((s) => (
-              <Badge key={s.label} variant="outline" className="bg-slate-800/50 border-slate-700/50">
-                <div className="w-2 h-2 rounded-full mr-1" style={{ backgroundColor: s.color }}></div>
-                {s.label}
-              </Badge>
-            ))}
+            {series &&
+              Array.isArray(series) &&
+              series.map((s) => (
+                <Badge key={s.label} variant="outline" className="bg-slate-800/50 border-slate-700/50">
+                  <div className="w-2 h-2 rounded-full mr-1" style={{ backgroundColor: s.color }}></div>
+                  {s.label}
+                </Badge>
+              ))}
           </div>
         </div>
       </CardHeader>

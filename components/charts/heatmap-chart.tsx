@@ -15,17 +15,22 @@ interface HeatmapChartProps {
 }
 
 export function HeatmapChart({ title, data }: HeatmapChartProps) {
+  const safeData = data || []
+  const safeTitle = title || "热力图"
+
   const days = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"]
   const hours = Array.from({ length: 24 }, (_, i) => i)
 
   const getValueForCell = (day: string, hour: number) => {
-    const cell = data.find((d) => d.day === day && d.hour === hour)
+    const cell = safeData.find((d) => d.day === day && d.hour === hour)
     return cell?.value || 0
   }
 
-  const maxValue = Math.max(...data.map((d) => d.value))
+  const maxValue = safeData.length > 0 ? Math.max(...safeData.map((d) => d.value)) : 100
 
   const getColorIntensity = (value: number) => {
+    if (maxValue === 0) return "bg-slate-800"
+
     const intensity = value / maxValue
     if (intensity > 0.8) return "bg-cyan-500"
     if (intensity > 0.6) return "bg-cyan-600"
@@ -40,7 +45,7 @@ export function HeatmapChart({ title, data }: HeatmapChartProps) {
       <CardHeader className="pb-2">
         <CardTitle className="text-slate-100 flex items-center text-base">
           <Activity className="mr-2 h-5 w-5 text-cyan-500" />
-          {title}
+          {safeTitle}
         </CardTitle>
       </CardHeader>
       <CardContent>

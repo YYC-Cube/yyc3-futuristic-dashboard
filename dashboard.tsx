@@ -9,7 +9,6 @@ import {
   Activity,
   AlertTriangle as AlertCircle,
   BarChart3,
-  Bell,
   X as CircleOff,
   Layout as Command,
   Cpu,
@@ -84,6 +83,10 @@ export default function Dashboard() {
   const [securityLevel, setSecurityLevel] = useState(75)
   const [currentTime, setCurrentTime] = useState(new Date())
   const [isLoading, setIsLoading] = useState(true)
+
+  const [showSearch, setShowSearch] = useState(false)
+  const [showUserMenu, setShowUserMenu] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
 
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
@@ -352,6 +355,14 @@ export default function Dashboard() {
               <input
                 type="text"
                 placeholder="搜索系统..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && searchQuery.trim()) {
+                    console.log("[v0] 搜索:", searchQuery)
+                    // 这里可以添加实际的搜索逻辑
+                  }
+                }}
                 className="bg-transparent border-none focus:outline-none text-sm w-40 placeholder:text-slate-500"
               />
             </div>
@@ -360,21 +371,8 @@ export default function Dashboard() {
               <div className="hidden lg:block">
                 <IndustrySelector currentIndustry={currentIndustry} onIndustryChange={setCurrentIndustry} />
               </div>
-              <NotificationCenter />
 
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button variant="ghost" size="icon" className="relative text-slate-400 hover:text-slate-100">
-                      <Bell className="h-5 w-5" />
-                      <span className="absolute -top-1 -right-1 h-2 w-2 bg-cyan-500 rounded-full animate-pulse"></span>
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>通知</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+              <NotificationCenter />
 
               <TooltipProvider>
                 <Tooltip>
@@ -383,21 +381,94 @@ export default function Dashboard() {
                       variant="ghost"
                       size="icon"
                       onClick={toggleTheme}
-                      className="text-slate-400 hover:text-slate-100"
+                      className="text-slate-400 hover:text-slate-100 hover:bg-slate-800/50"
                     >
                       {theme === "dark" ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>切换主题</p>
+                    <p>{theme === "dark" ? "切换到浅色模式" : "切换到深色模式"}</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
 
-              <Avatar className="hidden md:block">
-                <AvatarImage src="/placeholder.svg?height=40&width=40" alt={user?.name || "用户"} />
-                <AvatarFallback className="bg-slate-700 text-cyan-500">{user?.name?.charAt(0) || "管"}</AvatarFallback>
-              </Avatar>
+              <div className="relative hidden md:block">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={() => setShowUserMenu(!showUserMenu)}
+                        className="focus:outline-none focus:ring-2 focus:ring-cyan-500 rounded-full"
+                      >
+                        <Avatar className="cursor-pointer hover:ring-2 hover:ring-cyan-500 transition-all">
+                          <AvatarImage src="/placeholder.svg?height=40&width=40" alt={user?.name || "用户"} />
+                          <AvatarFallback className="bg-slate-700 text-cyan-500">
+                            {user?.name?.charAt(0) || "管"}
+                          </AvatarFallback>
+                        </Avatar>
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{user?.name || "用户菜单"}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+
+                {showUserMenu && (
+                  <div className="absolute right-0 mt-2 w-64 bg-slate-900 border border-slate-700 rounded-lg shadow-xl z-50 overflow-hidden">
+                    <div className="p-4 border-b border-slate-700/50 bg-slate-800/50">
+                      <div className="flex items-center space-x-3">
+                        <Avatar>
+                          <AvatarImage src="/placeholder.svg?height=40&width=40" alt={user?.name || "用户"} />
+                          <AvatarFallback className="bg-slate-700 text-cyan-500">
+                            {user?.name?.charAt(0) || "管"}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <div className="text-sm font-medium text-slate-100">{user?.name || "管理员"}</div>
+                          <div className="text-xs text-slate-400">{user?.email || "admin@system.com"}</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="py-2">
+                      <Link href="/settings" className="block">
+                        <button
+                          onClick={() => setShowUserMenu(false)}
+                          className="w-full px-4 py-2 text-left text-sm text-slate-300 hover:bg-slate-800/50 flex items-center"
+                        >
+                          <Settings className="h-4 w-4 mr-2 text-slate-400" />
+                          系统设置
+                        </button>
+                      </Link>
+
+                      <button
+                        onClick={() => {
+                          setShowUserMenu(false)
+                          console.log("[v0] 切换账户")
+                        }}
+                        className="w-full px-4 py-2 text-left text-sm text-slate-300 hover:bg-slate-800/50 flex items-center"
+                      >
+                        <Avatar className="h-4 w-4 mr-2" />
+                        切换账户
+                      </button>
+
+                      <div className="border-t border-slate-700/50 my-2"></div>
+
+                      <button
+                        onClick={() => {
+                          setShowUserMenu(false)
+                          console.log("[v0] 退出登录")
+                        }}
+                        className="w-full px-4 py-2 text-left text-sm text-red-400 hover:bg-slate-800/50 flex items-center"
+                      >
+                        <CircleOff className="h-4 w-4 mr-2" />
+                        退出登录
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </header>
@@ -537,7 +608,9 @@ export default function Dashboard() {
                                 ? "border-red-500/50"
                                 : insight.priority === "high"
                                   ? "border-amber-500/50"
-                                  : "border-slate-700/50"
+                                  : insight.priority === "optimization"
+                                    ? "border-blue-500/50"
+                                    : "border-slate-700/50"
                             }`}
                           >
                             <div className="flex items-start justify-between">
@@ -1112,6 +1185,8 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {showUserMenu && <div className="fixed inset-0 z-40" onClick={() => setShowUserMenu(false)} />}
+
       <MobileBottomNav activeTab={mobileTab} onTabChange={setMobileTab} />
     </div>
   )
@@ -1198,7 +1273,7 @@ function MetricCard({
       case "down":
         return <BarChart3 className="h-4 w-4 rotate-180 text-green-500" />
       case "stable":
-        return <LineChart className="h-4 w-4 text-blue-500" />
+        return <LineChart className="h-4 w-4" />
       default:
         return null
     }
