@@ -54,60 +54,60 @@
 📁 项目结构
 
 \`\`\`
-├── app/                          # Next.js App Router 页面
-│   ├── layout.tsx               # 全局布局（包含 AuthProvider）
-│   ├── page.tsx                 # 主页（仪表板）
-│   ├── analytics/               # 数据分析页面
-│   ├── communications/          # 通讯中心页面
-│   ├── console/                 # 系统控制台页面
-│   ├── data-center/            # 数据中心页面
-│   ├── network/                # 网络监控页面
-│   ├── security/               # 安全防护页面
-│   └── settings/               # 系统设置页面
-├── components/                  # React 组件
-│   ├── ai-insights-panel.tsx   # AI 洞察面板
-│   ├── auth/                   # 权限管理组件
-│   │   ├── auth-context.tsx    # 权限上下文
-│   │   ├── auth-guard.tsx      # 路由守卫
-│   │   ├── permission-gate.tsx # 权限门控
+├── app/                           # Next.js App Router 页面
+│   ├── layout.tsx                 # 全局布局（包含 AuthProvider）
+│   ├── page.tsx                   # 主页（仪表板）
+│   ├── analytics/                 # 数据分析页面
+│   ├── communications/            # 通讯中心页面
+│   ├── console/                   # 系统控制台页面
+│   ├── data-center/               # 数据中心页面
+│   ├── network/                   # 网络监控页面
+│   ├── security/                  # 安全防护页面
+│   └── settings/                  # 系统设置页面
+├── components/                    # React 组件
+│   ├── ai-insights-panel.tsx      # AI 洞察面板
+│   ├── auth/                      # 权限管理组件
+│   │   ├── auth-context.tsx       # 权限上下文
+│   │   ├── auth-guard.tsx         # 路由守卫
+│   │   ├── permission-gate.tsx    # 权限门控
 │   │   ├── user-management-panel.tsx
 │   │   ├── role-permissions-panel.tsx
 │   │   └── tenant-selector.tsx
-│   ├── charts/                 # 高级图表组件
+│   ├── charts/                    # 高级图表组件
 │   │   ├── advanced-line-chart.tsx
 │   │   ├── area-comparison-chart.tsx
 │   │   ├── charts-dashboard.tsx
 │   │   ├── heatmap-chart.tsx
 │   │   ├── radial-progress-chart.tsx
 │   │   └── real-time-gauge.tsx
-│   ├── collaboration/          # 协作组件
+│   ├── collaboration/             # 协作组件
 │   │   ├── activity-feed.tsx
 │   │   └── team-presence.tsx
-│   ├── mobile/                 # 移动端组件
+│   ├── mobile/                    # 移动端组件
 │   │   ├── mobile-bottom-nav.tsx
 │   │   ├── mobile-metric-card.tsx
 │   │   ├── mobile-nav.tsx
 │   │   └── mobile-stats-grid.tsx
-│   ├── notifications/          # 通知组件
+│   ├── notifications/             # 通知组件
 │   │   └── notification-center.tsx
-│   └── ui/                     # shadcn/ui 基础组件
-├── lib/                        # 工具库和业务逻辑
-│   ├── ai-engine.ts           # AI 分析引擎
-│   ├── auth/                  # 权限管理逻辑
-│   │   ├── types.ts           # 类型定义
-│   │   ├── permissions.ts     # 权限验证
-│   │   └── auth-context.tsx   # 权限上下文
-│   ├── chart-data-generator.ts # 图表数据生成器
-│   ├── notifications/         # 通知系统
+│   └── ui/                        # shadcn/ui 基础组件
+├── lib/                           # 工具库和业务逻辑
+│   ├── ai-engine.ts               # AI 分析引擎
+│   ├── auth/                      # 权限管理逻辑
+│   │   ├── types.ts               # 类型定义
+│   │   ├── permissions.ts         # 权限验证
+│   │   └── auth-context.tsx       # 权限上下文
+│   ├── chart-data-generator.ts    # 图表数据生成器
+│   ├── notifications/             # 通知系统
 │   │   ├── notification-types.ts
 │   │   └── notification-manager.ts
-│   └── utils.ts               # 工具函数
-├── hooks/                     # React Hooks
-│   ├── use-ai-analysis.ts    # AI 分析 Hook
-│   ├── use-mobile.ts         # 移动端检测 Hook
-│   └── use-notifications.ts  # 通知 Hook
-├── dashboard.tsx             # 主仪表板组件
-└── public/                   # 静态资源
+│   └── utils.ts                   # 工具函数
+├── hooks/                         # React Hooks
+│   ├── use-ai-analysis.ts         # AI 分析 Hook
+│   ├── use-mobile.ts              # 移动端检测 Hook
+│   └── use-notifications.ts       # 通知 Hook
+├── dashboard.tsx                  # 主仪表板组件
+└── public/                        # 静态资源
 \`\`\`
 
 🚀 快速开始
