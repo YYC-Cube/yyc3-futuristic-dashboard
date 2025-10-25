@@ -5,8 +5,6 @@
   <img src="public/github.png" alt="星云操作系统 Logo" width="120" />
 </p>
 
-<p align="center">
-  <strong>星云操作系统 - 企业级 AI 智能管理平台</strong><br/>
   <em>万象归元于云枢，深栈智启新纪元。</em>
 </p>
 
