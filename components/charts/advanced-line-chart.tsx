@@ -10,18 +10,23 @@ interface DataPoint {
 }
 
 interface AdvancedLineChartProps {
-  title: string
-  data: DataPoint[]
+  title?: string
+  data?: DataPoint[]
   color?: string
   height?: number
 }
 
-export function AdvancedLineChart({ title, data, color = "#06b6d4", height = 300 }: AdvancedLineChartProps) {
+export function AdvancedLineChart({
+  title = "数据趋势",
+  data = [],
+  color = "#06b6d4",
+  height = 300,
+}: AdvancedLineChartProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
     const canvas = canvasRef.current
-    if (!canvas || data.length === 0) return
+    if (!canvas || !data || !Array.isArray(data) || data.length === 0) return
 
     const ctx = canvas.getContext("2d")
     if (!ctx) return
@@ -35,10 +40,10 @@ export function AdvancedLineChart({ title, data, color = "#06b6d4", height = 300
     ctx.scale(dpr, dpr)
 
     const width = rect.width
-    const height = rect.height
+    const chartHeight = height - 20 - 40 // Adjusted for padding top and bottom
+
     const padding = { top: 20, right: 20, bottom: 40, left: 50 }
     const chartWidth = width - padding.left - padding.right
-    const chartHeight = height - padding.top - padding.bottom
 
     // 清空画布
     ctx.clearRect(0, 0, width, height)
@@ -75,7 +80,7 @@ export function AdvancedLineChart({ title, data, color = "#06b6d4", height = 300
 
     ctx.beginPath()
     data.forEach((point, index) => {
-      const x = padding.left + (chartWidth / (data.length - 1)) * index
+      const x = padding.left + (data.length > 1 ? (chartWidth / (data.length - 1)) * index : chartWidth / 2)
       const y = padding.top + chartHeight - ((point.value - minValue) / valueRange) * chartHeight
 
       if (index === 0) {
@@ -97,7 +102,7 @@ export function AdvancedLineChart({ title, data, color = "#06b6d4", height = 300
     ctx.lineWidth = 2
 
     data.forEach((point, index) => {
-      const x = padding.left + (chartWidth / (data.length - 1)) * index
+      const x = padding.left + (data.length > 1 ? (chartWidth / (data.length - 1)) * index : chartWidth / 2)
       const y = padding.top + chartHeight - ((point.value - minValue) / valueRange) * chartHeight
 
       if (index === 0) {
@@ -111,7 +116,7 @@ export function AdvancedLineChart({ title, data, color = "#06b6d4", height = 300
 
     // 绘制数据点
     data.forEach((point, index) => {
-      const x = padding.left + (chartWidth / (data.length - 1)) * index
+      const x = padding.left + (data.length > 1 ? (chartWidth / (data.length - 1)) * index : chartWidth / 2)
       const y = padding.top + chartHeight - ((point.value - minValue) / valueRange) * chartHeight
 
       // 外圈
@@ -132,10 +137,10 @@ export function AdvancedLineChart({ title, data, color = "#06b6d4", height = 300
     ctx.font = "10px monospace"
     ctx.textAlign = "center"
 
-    const labelStep = Math.ceil(data.length / 6)
+    const labelStep = Math.max(1, Math.ceil(data.length / 6))
     data.forEach((point, index) => {
       if (index % labelStep === 0 || index === data.length - 1) {
-        const x = padding.left + (chartWidth / (data.length - 1)) * index
+        const x = padding.left + (data.length > 1 ? (chartWidth / (data.length - 1)) * index : chartWidth / 2)
         ctx.fillText(point.time, x, height - 10)
       }
     })
@@ -150,7 +155,11 @@ export function AdvancedLineChart({ title, data, color = "#06b6d4", height = 300
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <canvas ref={canvasRef} style={{ width: "100%", height: `${height}px` }} />
+        {!data || data.length === 0 ? (
+          <div className="flex items-center justify-center h-[300px] text-slate-500">暂无数据</div>
+        ) : (
+          <canvas ref={canvasRef} style={{ width: "100%", height: `${height}px` }} />
+        )}
       </CardContent>
     </Card>
   )

@@ -29,159 +29,263 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="MIT License" /></a>
 </p>
 
-万象归元于云枢，深栈智启新纪元。
----
 
-## 📦 项目特性
+📦 项目特性
 
-### 🔧 核心功能
+### 核心功能
 
-- **AI 智能分析引擎**：实时数据预测、异常检测、智能建议
-- **多租户权限管理**：基于 RBAC 的细粒度权限控制系统
-- **高级数据可视化**：5 种专业图表组件（折线图、热力图、径向图、区域图、仪表盘）
-- **实时协作通知**：通知中心、活动流、团队在线状态
-- **全平台响应式**：完美适配桌面端和移动端
-- **完整中文支持**：所有界面和提示均为中文
+- **AI 智能分析引擎** - 实时数据预测、异常检测和智能建议
+- **多租户权限管理** - 基于 RBAC 的细粒度权限控制系统
+- **高级数据可视化** - 5种专业图表组件（折线图、热力图、径向图、区域图、仪表盘）
+- **实时协作通知** - 通知中心、活动流、团队在线状态
+- **全平台响应式** - 完美适配桌面端和移动端
+- **完整中文支持** - 所有界面和提示均为中文
 
----
+🧱 技术栈
 
-## 🧱 技术栈
+- **框架**: Next.js 16 (App Router)
+- **UI 库**: React 19.2
+- **语言**: TypeScript
+- **样式**: Tailwind CSS
+- **组件库**: shadcn/ui
+- **图标**: Lucide React
+- **动画**: Framer Motion (可选)
 
-| 技术 | 说明 |
-|------|------|
-| Next.js 16 | App Router 架构 |
-| React 19.2 | 最新 UI 框架 |
-| TypeScript 5.0 | 类型安全 |
-| Tailwind CSS 3.3 | 原子化样式 |
-| shadcn/ui | 现代组件库 |
-| Lucide React | 图标系统 |
-| Framer Motion | 动画支持（可选） |
+📁 项目结构
 
----
+\`\`\`
+├── app/                          # Next.js App Router 页面
+│   ├── layout.tsx               # 全局布局（包含 AuthProvider）
+│   ├── page.tsx                 # 主页（仪表板）
+│   ├── analytics/               # 数据分析页面
+│   ├── communications/          # 通讯中心页面
+│   ├── console/                 # 系统控制台页面
+│   ├── data-center/            # 数据中心页面
+│   ├── network/                # 网络监控页面
+│   ├── security/               # 安全防护页面
+│   └── settings/               # 系统设置页面
+├── components/                  # React 组件
+│   ├── ai-insights-panel.tsx   # AI 洞察面板
+│   ├── auth/                   # 权限管理组件
+│   │   ├── auth-context.tsx    # 权限上下文
+│   │   ├── auth-guard.tsx      # 路由守卫
+│   │   ├── permission-gate.tsx # 权限门控
+│   │   ├── user-management-panel.tsx
+│   │   ├── role-permissions-panel.tsx
+│   │   └── tenant-selector.tsx
+│   ├── charts/                 # 高级图表组件
+│   │   ├── advanced-line-chart.tsx
+│   │   ├── area-comparison-chart.tsx
+│   │   ├── charts-dashboard.tsx
+│   │   ├── heatmap-chart.tsx
+│   │   ├── radial-progress-chart.tsx
+│   │   └── real-time-gauge.tsx
+│   ├── collaboration/          # 协作组件
+│   │   ├── activity-feed.tsx
+│   │   └── team-presence.tsx
+│   ├── mobile/                 # 移动端组件
+│   │   ├── mobile-bottom-nav.tsx
+│   │   ├── mobile-metric-card.tsx
+│   │   ├── mobile-nav.tsx
+│   │   └── mobile-stats-grid.tsx
+│   ├── notifications/          # 通知组件
+│   │   └── notification-center.tsx
+│   └── ui/                     # shadcn/ui 基础组件
+├── lib/                        # 工具库和业务逻辑
+│   ├── ai-engine.ts           # AI 分析引擎
+│   ├── auth/                  # 权限管理逻辑
+│   │   ├── types.ts           # 类型定义
+│   │   ├── permissions.ts     # 权限验证
+│   │   └── auth-context.tsx   # 权限上下文
+│   ├── chart-data-generator.ts # 图表数据生成器
+│   ├── notifications/         # 通知系统
+│   │   ├── notification-types.ts
+│   │   └── notification-manager.ts
+│   └── utils.ts               # 工具函数
+├── hooks/                     # React Hooks
+│   ├── use-ai-analysis.ts    # AI 分析 Hook
+│   ├── use-mobile.ts         # 移动端检测 Hook
+│   └── use-notifications.ts  # 通知 Hook
+├── dashboard.tsx             # 主仪表板组件
+└── public/                   # 静态资源
+\`\`\`
 
-## 📁 项目结构
-
-```bash
-├── app/                 # 页面结构
-│   ├── layout.tsx       # 全局布局
-│   ├── page.tsx         # 仪表板主页
-│   └── ...              # 功能页面
-├── components/          # UI 组件
-├── lib/                 # 核心逻辑
-├── hooks/               # 自定义 Hook
-├── dashboard.tsx        # 主仪表板
-└── public/              # 静态资源
-```
-
----
-
-## 🚀 快速开始
+🚀 快速开始
 
 ### 安装依赖
 
-```bash
+\`\`\`bash
+npm install
+# 或
+yarn install
+# 或
 pnpm install
-```
+\`\`\`
 
-### 启动开发环境
+### 开发环境运行
 
-```bash
+\`\`\`bash
+npm run dev
+# 或
+yarn dev
+# 或
 pnpm dev
-```
+\`\`\`
 
-访问：[http://localhost:3000](http://localhost:3000)
+访问 [http://localhost:3000](http://localhost:3000) 查看应用。
 
-### 构建生产环境
+### 生产构建
 
-```bash
-pnpm build
-pnpm start
-```
+\`\`\`bash
+npm run build
+npm run start
+\`\`\`
 
----
+🔍 功能模块详解
 
-## 🔍 功能模块详解
+### 1. AI 智能分析引擎
 
-### 1️⃣ AI 智能分析引擎
+位置: `lib/ai-engine.ts`, `hooks/use-ai-analysis.ts`, `components/ai-insights-panel.tsx`
 
-位置：`lib/ai-engine.ts`, `hooks/use-ai-analysis.ts`, `components/ai-insights-panel.tsx`
-
-功能：
-- 时间序列预测（移动平均）
-- 异常检测（Z-score）
+**功能:**
+- 时间序列预测（移动平均算法）
+- 异常检测（Z-score 统计方法）
 - 趋势分析（线性回归）
 - 智能建议生成
 
-使用示例：
-```ts
+**使用示例:**
+\`\`\`typescript
+import { useAIAnalysis } from '@/hooks/use-ai-analysis'
+
 const { predictions, anomalies, recommendations, runAnalysis } = useAIAnalysis()
-runAnalysis({ cpu: 42, memory: 68, network: 92, security: 75 })
-```
 
----
+// 运行分析
+runAnalysis({
+  cpu: 42,
+  memory: 68,
+  network: 92,
+  security: 75
+})
+\`\`\`
 
-### 2️⃣ 权限管理系统
+### 2. 权限管理系统
 
-位置：`lib/auth/`, `components/auth/`
+位置: `lib/auth/`, `components/auth/`
 
-角色层级：
-- super_admin / admin / manager / operator / viewer
+**角色层级:**
+- 超级管理员 (super_admin)
+- 管理员 (admin)
+- 经理 (manager)
+- 操作员 (operator)
+- 查看者 (viewer)
 
-权限类型：
-- view:dashboard / manage:users / execute:commands 等
+**权限类型:**
+- view:dashboard - 查看仪表板
+- view:analytics - 查看数据分析
+- view:data - 查看数据中心
+- view:network - 查看网络监控
+- view:security - 查看安全防护
+- view:ai-insights - 查看 AI 洞察
+- manage:users - 管理用户
+- manage:roles - 管理角色
+- manage:settings - 管理系统设置
+- manage:resources - 管理资源分配
+- execute:commands - 执行系统命令
+- export:data - 导出数据
 
-使用示例：
-```ts
+**使用示例:**
+\`\`\`typescript
+import { useAuth } from '@/lib/auth/auth-context'
+import { PermissionGate } from '@/components/auth/permission-gate'
+
+// 在组件中使用
+const { user, hasPermission } = useAuth()
+
+// 条件渲染
 {hasPermission('manage:users') && <UserManagementPanel />}
-<PermissionGate permission="view:analytics"><AnalyticsContent /></PermissionGate>
-```
 
----
+// 使用权限门控组件
+<PermissionGate permission="view:analytics">
+  <AnalyticsContent />
+</PermissionGate>
+\`\`\`
 
-### 3️⃣ 高级数据可视化
+### 3. 高级数据可视化
 
-位置：`components/charts/`
+位置: `components/charts/`
 
-图表类型：
-- 折线图 / 热力图 / 径向图 / 区域图 / 实时仪表盘
+**图表类型:**
+- **高级折线图** - 带渐变填充的时间序列图表
+- **热力图** - 24小时活动热力分析
+- **径向进度图** - 多指标环形展示
+- **区域对比图** - 多数据系列对比分析
+- **实时仪表盘** - 动画过渡的实时指标
 
-使用示例：
-```ts
-<RealTimeGauge value={cpuUsage} max={100} label="CPU" color="cyan" size="medium" />
-```
+**使用示例:**
+\`\`\`typescript
+import { RealTimeGauge } from '@/components/charts/real-time-gauge'
 
----
+<RealTimeGauge 
+  value={cpuUsage} 
+  max={100} 
+  label="CPU" 
+  color="cyan" 
+  size="medium" 
+/>
+\`\`\`
 
-### 4️⃣ 实时通知系统
+### 4. 实时通知系统
 
-位置：`lib/notifications/`, `components/notifications/`
+位置: `lib/notifications/`, `components/notifications/`
 
-通知类型：info / success / warning / error / system  
-优先级：low / medium / high / urgent
+**通知类型:**
+- info - 信息通知
+- success - 成功通知
+- warning - 警告通知
+- error - 错误通知
+- system - 系统通知
 
-使用示例：
-```ts
-addNotification({ title: '系统更新', message: '新版本已准备好安装', type: 'info', priority: 'medium' })
-```
+**优先级:**
+- low - 低优先级
+- medium - 中优先级
+- high - 高优先级
+- urgent - 紧急
 
----
+**使用示例:**
+\`\`\`typescript
+import { useNotifications } from '@/hooks/use-notifications'
 
-### 5️⃣ 移动端适配
+const { notifications, addNotification, markAsRead } = useNotifications()
 
-位置：`components/mobile/`, `hooks/use-mobile.ts`
+// 添加通知
+addNotification({
+  title: '系统更新',
+  message: '新版本已准备好安装',
+  type: 'info',
+  priority: 'medium'
+})
+\`\`\`
 
-组件：
-- MobileNav / MobileBottomNav / MobileMetricCard / MobileStatsGrid
+### 5. 移动端适配
 
-使用示例：
-```ts
+位置: `components/mobile/`, `hooks/use-mobile.ts`
+
+**移动端组件:**
+- MobileNav - 侧边抽屉导航
+- MobileBottomNav - 底部标签栏
+- MobileMetricCard - 优化的指标卡片
+- MobileStatsGrid - 统计数据网格
+
+**使用示例:**
+\`\`\`typescript
+import { useMobile } from '@/hooks/use-mobile'
+
 const isMobile = useMobile()
+
 {isMobile ? <MobileView /> : <DesktopView />}
-```
+\`\`\`
 
----
-
-## 🧭 页面路由权限表
+## 页面路由
 
 | 路由 | 页面 | 权限要求 |
 |------|------|----------|
@@ -194,71 +298,82 @@ const isMobile = useMobile()
 | `/communications` | 通讯中心 | 无 |
 | `/settings` | 系统设置 | manage:settings |
 
----
+## 环境变量
 
-## ⚙️ 自定义配置
+查看 `.env.example` 文件了解所需的环境变量配置。
+
+## 自定义配置
 
 ### 修改主题颜色
 
-编辑 `app/globals.css` 中的 CSS 变量：
+编辑 `app/globals.css` 中的 CSS 变量:
 
-```css
+\`\`\`css
 :root {
   --background: 0 0% 0%;
   --foreground: 210 40% 98%;
   --primary: 189 94% 43%;
   --primary-foreground: 0 0% 100%;
+  /* ... 更多颜色变量 */
 }
-```
+\`\`\`
 
 ### 添加新的权限
 
-1. 修改 `lib/auth/types.ts`
-2. 更新 `lib/auth/permissions.ts`
-3. 使用 `PermissionGate` 控制访问
+1. 在 `lib/auth/types.ts` 中添加新的权限类型
+2. 在 `lib/auth/permissions.ts` 中更新角色权限映射
+3. 使用 `PermissionGate` 组件保护相关 UI
 
----
+🧭 页面路由
 
-## 🧪 性能优化
+路由	页面	权限要求
+/	主仪表板	view:dashboard
+/analytics	数据分析	view:analytics
+/data-center	数据中心	view:data
+/network	网络监控	view:network
+/security	安全防护	view:security
+/console	系统控制台	execute:commands
+/communications	通讯中心	无
+/settings	系统设置	manage:settings
 
-- 使用 React Server Components 减少 JS 体积
-- 图表组件使用 Canvas API 提升渲染性能
-- 移动端使用专用组件
-- 使用 `useCallback` / `useMemo` 优化重渲染
+
+🧪 性能优化
+
+- 使用 React Server Components 减少客户端 JavaScript
+- 图表组件使用 Canvas API 实现高性能渲染
+- 移动端使用专用组件优化性能
+- 使用 `useCallback` 和 `useMemo` 优化重渲染
 - 懒加载非关键组件
 
----
+🌐 浏览器支持
 
-## 🌐 浏览器支持
+- Chrome (最新版本)
+- Firefox (最新版本)
+- Safari (最新版本)
+- Edge (最新版本)
 
-- Chrome / Firefox / Safari / Edge（最新版本）
+🤝 贡献指南
+Fork 仓库：https://github.com/YYC-Cube/yyc3-Futuristic-Dashboard.git
 
----
+创建分支
 
-## 🤝 贡献指南
+提交更改
 
-1. Fork 仓库：[YYC-Cube/yyc3-Futuristic-Dashboard](https://github.com/YYC-Cube/yyc3-Futuristic-Dashboard.git)  
-2. 创建分支  
-3. 提交更改  
-4. 开启 Pull Request
+开启 Pull Request
 
----
+📜 许可证
 
-## 📜 许可证
+本项目采用 MIT 许可证。
 
-本项目采用 [MIT License](LICENSE)。
+📮 技术支持
 
----
+如有问题或建议，请通过以下方式联系:
 
-## 📮 技术支持
+提交 Issue
+联系邮箱：admin@0379.email
+查看项目文档
 
-- 提交 Issue
-- 联系邮箱：admin@0379.email
-- 查看项目文档
-
----
-
-## 🕘 更新日志
+🕘 更新日志
 
 ### v1.0.0 (2025-01-25)
 

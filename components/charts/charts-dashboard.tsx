@@ -8,8 +8,11 @@ import { RadialProgressChart } from "./radial-progress-chart"
 import { AreaComparisonChart } from "./area-comparison-chart"
 import { RealTimeGauge } from "./real-time-gauge"
 import { BarChart3, Activity } from "lucide-react"
+import { generateTimeSeriesData } from "@/lib/chart-data-generator"
 
 export function ChartsDashboard() {
+  const performanceData = generateTimeSeriesData(24, 30, 90)
+
   return (
     <div className="grid gap-6">
       <Card className="bg-slate-900/50 border-slate-700/50 backdrop-blur-sm">
@@ -55,7 +58,7 @@ export function ChartsDashboard() {
                     <div className="text-sm font-medium text-slate-300">系统性能趋势</div>
                     <div className="text-xs text-slate-500">过去 24 小时</div>
                   </div>
-                  <AdvancedLineChart />
+                  <AdvancedLineChart title="CPU 使用率趋势" data={performanceData} color="#06b6d4" height={300} />
                 </div>
               </div>
             </TabsContent>

@@ -43,18 +43,45 @@ export const RolePermissionMap: Record<UserRole, Permission[]> = {
     "manage:settings",
     "export:data",
   ],
-  manager: [
-    "view:dashboard",
-    "view:data",
-    "view:network",
-    "view:security",
-    "manage:resources",
-  ],
-  operator: [
-    "view:dashboard",
-    "view:data",
-    "view:network",
-    "execute:commands",
-  ],
+  manager: ["view:dashboard", "view:data", "view:network", "view:security", "manage:resources"],
+  operator: ["view:dashboard", "view:data", "view:network", "execute:commands"],
   viewer: ["view:dashboard", "view:data"],
+}
+
+export const ROLE_PERMISSIONS = RolePermissionMap
+
+export const ROLE_DESCRIPTIONS: Record<UserRole, string> = {
+  super_admin: "拥有系统所有权限，可以管理整个平台",
+  admin: "管理员角色，可以管理用户、角色和系统设置",
+  manager: "经理角色，可以查看数据和管理资源",
+  operator: "操作员角色，可以查看数据和执行命令",
+  viewer: "查看者角色，只能查看基础数据",
+}
+
+/**
+ * 根据角色获取权限列表
+ */
+export function getPermissionsByRole(role: UserRole): Permission[] {
+  return RolePermissionMap[role] || []
+}
+
+/**
+ * 检查用户是否拥有特定权限
+ */
+export function hasPermission(userPermissions: Permission[], permission: Permission): boolean {
+  return userPermissions.includes(permission)
+}
+
+/**
+ * 检查用户是否拥有任意一个权限
+ */
+export function hasAnyPermission(userPermissions: Permission[], permissions: Permission[]): boolean {
+  return permissions.some((permission) => userPermissions.includes(permission))
+}
+
+/**
+ * 检查用户是否拥有所有权限
+ */
+export function hasAllPermissions(userPermissions: Permission[], permissions: Permission[]): boolean {
+  return permissions.every((permission) => userPermissions.includes(permission))
 }

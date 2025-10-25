@@ -23,6 +23,8 @@ export function RadialProgressChart({ title, metrics }: RadialProgressChartProps
     const ctx = canvas.getContext("2d")
     if (!ctx) return
 
+    if (!metrics || metrics.length === 0) return
+
     const dpr = window.devicePixelRatio || 1
     const rect = canvas.getBoundingClientRect()
 
