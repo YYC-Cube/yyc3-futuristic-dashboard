@@ -20,6 +20,10 @@ export const metadata: Metadata = {
   title: "星云操作系统 - 企业级 AI 智能管理平台",
   description: "基于 AI 的企业级智能管理系统，提供实时监控、预测分析、异常检测和智能建议",
   generator: "v0.app",
+  icons: {
+    icon: "/logo.png",
+    apple: "/logo.png",
+  },
 }
 
 export function reportWebVitals(metric: any) {

@@ -1,26 +1,29 @@
 "use client"
 
+import type React from "react"
+
+import { TooltipContent } from "@/components/ui/tooltip"
+
 import { useEffect, useState, useRef, useCallback } from "react"
 import {
   Activity,
-  AlertCircle,
+  AlertTriangle as AlertCircle,
   BarChart3,
   Bell,
-  CircleOff,
-  Command,
+  X as CircleOff,
+  Layout as Command,
   Cpu,
   Database,
   Download,
   Globe,
   HardDrive,
-  Hexagon,
-  LineChart,
+  Layout as Hexagon,
+  TrendingUp as LineChart,
   Lock,
-  type LucideIcon,
   MessageSquare,
-  Mic,
+  MessageSquare as Mic,
   Moon,
-  Radio,
+  Wifi as Radio,
   RefreshCw,
   Search,
   Settings,
@@ -30,13 +33,14 @@ import {
   TrendingUp,
   Wifi,
   Zap,
-} from "lucide-react"
+} from "@/lib/icons"
+import type { LucideIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { Tooltip, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Slider } from "@/components/ui/slider"
@@ -58,9 +62,18 @@ import { getIndustryConfig, generateIndustryMetrics, type IndustryType } from "@
 import { generateRealTimeInsights } from "@/lib/enhanced-ai-engine"
 import Link from "next/link"
 
+// Add missing imports
+function Info(props: React.SVGProps<SVGSVGElement>) {
+  return <AlertCircle {...props} />
+}
+
+function Check(props: React.SVGProps<SVGSVGElement>) {
+  return <Shield {...props} />
+}
+
 export default function Dashboard() {
   const [theme, setTheme] = useState<"dark" | "light">("dark")
-  const [currentIndustry, setCurrentIndustry] = useState<IndustryType>("data-center")
+  const [currentIndustry, setCurrentIndustry] = useState<IndustryType>("yyc3-dc")
   const [industryMetrics, setIndustryMetrics] = useState<Record<string, number>>({})
   const [realTimeInsights, setRealTimeInsights] = useState<any[]>([])
 
@@ -78,6 +91,26 @@ export default function Dashboard() {
   const [mobileTab, setMobileTab] = useState("home")
 
   const industryConfig = getIndustryConfig(currentIndustry)
+
+  // AI analysis Hook
+  const { predictions, anomalies, recommendations, runAnalysis } = useAIAnalysis()
+  const { user, tenant } = useAuth()
+
+  // 修复：使用 useCallback 包装 runAnalysis 调用，并添加防抖
+  const analysisTimeoutRef = useRef<NodeJS.Timeout>()
+
+  const runAnalysisDebounced = useCallback(
+    (data: any) => {
+      if (analysisTimeoutRef.current) {
+        clearTimeout(analysisTimeoutRef.current)
+      }
+
+      analysisTimeoutRef.current = setTimeout(() => {
+        runAnalysis(data)
+      }, 1000) // 1秒防抖，避免频繁调用
+    },
+    [runAnalysis],
+  )
 
   // Simulate data loading
   useEffect(() => {
@@ -98,6 +131,8 @@ export default function Dashboard() {
   }, [currentIndustry])
 
   useEffect(() => {
+    if (!industryConfig) return
+
     const interval = setInterval(() => {
       const metrics = generateIndustryMetrics(currentIndustry)
       setIndustryMetrics(metrics)
@@ -211,6 +246,27 @@ export default function Dashboard() {
     }
   }, [])
 
+  // 修复：Run AI analysis on data update - 使用防抖版本
+  useEffect(() => {
+    if (!isLoading) {
+      runAnalysisDebounced({
+        cpu: cpuUsage,
+        memory: memoryUsage,
+        network: networkStatus,
+        security: securityLevel,
+      })
+    }
+  }, [cpuUsage, memoryUsage, networkStatus, securityLevel, isLoading, runAnalysisDebounced])
+
+  // 清理 timeout
+  useEffect(() => {
+    return () => {
+      if (analysisTimeoutRef.current) {
+        clearTimeout(analysisTimeoutRef.current)
+      }
+    }
+  }, [])
+
   // Toggle theme
   const toggleTheme = () => {
     setTheme(theme === "dark" ? "light" : "dark")
@@ -235,47 +291,18 @@ export default function Dashboard() {
     })
   }
 
-  // AI analysis Hook
-  const { predictions, anomalies, recommendations, runAnalysis } = useAIAnalysis()
-
-  const { user, tenant } = useAuth()
-
-  // 修复：使用 useCallback 包装 runAnalysis 调用，并添加防抖
-  const analysisTimeoutRef = useRef<NodeJS.Timeout>()
-
-  const runAnalysisDebounced = useCallback(
-    (data: any) => {
-      if (analysisTimeoutRef.current) {
-        clearTimeout(analysisTimeoutRef.current)
-      }
-
-      analysisTimeoutRef.current = setTimeout(() => {
-        runAnalysis(data)
-      }, 1000) // 1秒防抖，避免频繁调用
-    },
-    [runAnalysis],
-  )
-
-  // 修复：Run AI analysis on data update - 使用防抖版本
-  useEffect(() => {
-    if (!isLoading) {
-      runAnalysisDebounced({
-        cpu: cpuUsage,
-        memory: memoryUsage,
-        network: networkStatus,
-        security: securityLevel,
-      })
-    }
-  }, [cpuUsage, memoryUsage, networkStatus, securityLevel, isLoading, runAnalysisDebounced])
-
-  // 清理 timeout
-  useEffect(() => {
-    return () => {
-      if (analysisTimeoutRef.current) {
-        clearTimeout(analysisTimeoutRef.current)
-      }
-    }
-  }, [])
+  // 如果配置不存在，显示错误状态
+  if (!industryConfig) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-black to-slate-900 text-slate-100 flex items-center justify-center">
+        <div className="text-center">
+          <AlertCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold mb-2">配置加载失败</h2>
+          <p className="text-slate-400">无法加载行业配置，请刷新页面重试</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div
@@ -305,7 +332,7 @@ export default function Dashboard() {
         <header className="flex items-center justify-between py-4 border-b border-slate-700/50 mb-6">
           <div className="flex items-center space-x-2">
             <MobileNav />
-            <Hexagon className="h-8 w-8 text-cyan-500" />
+            <img src="/logo.png" alt="星云操作系统" className="h-8 w-8 object-contain" />
             <span className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
               星云操作系统
             </span>
@@ -384,6 +411,9 @@ export default function Dashboard() {
                 <nav className="space-y-2">
                   <Link href="/" className="block">
                     <NavItem icon={Command} label="仪表板" active />
+                  </Link>
+                  <Link href="/industries" className="block">
+                    <NavItem icon={Hexagon} label="行业管理" />
                   </Link>
                   <PermissionGate permission="view:analytics">
                     <Link href="/analytics" className="block">
@@ -479,12 +509,12 @@ export default function Dashboard() {
                           <div className="text-xs text-slate-500">
                             正常范围: {min}-{max} {metric.unit}
                           </div>
-                          <Progress value={percentage} className="h-1 mt-2 bg-slate-700">
+                          <Progress className="h-1 mt-2 bg-slate-700" value={Math.min(100, Math.max(0, percentage))}>
                             <div
                               className={`h-full rounded-full ${
                                 isWarning ? "bg-red-500" : "bg-gradient-to-r from-cyan-500 to-blue-500"
                               }`}
-                              style={{ width: `${Math.min(100, percentage)}%` }}
+                              style={{ width: `${Math.min(100, Math.max(0, percentage))}%` }}
                             />
                           </Progress>
                         </div>
@@ -771,7 +801,7 @@ export default function Dashboard() {
                             <div className="text-sm font-medium">安全等级</div>
                             <div className="text-sm text-cyan-400">{securityLevel}%</div>
                           </div>
-                          <Progress value={securityLevel} className="h-2 bg-slate-700">
+                          <Progress className="h-2 bg-slate-700" value={securityLevel}>
                             <div
                               className="h-full bg-gradient-to-r from-green-500 to-cyan-500 rounded-full"
                               style={{ width: `${securityLevel}%` }}
@@ -1311,12 +1341,12 @@ function StorageItem({
           </div>
           <div className="text-xs text-slate-400">{percentage}%</div>
         </div>
-        <Progress value={percentage} className="h-1.5 bg-slate-700">
+        <Progress className="h-1.5 bg-slate-700" value={Math.min(100, Math.max(0, percentage))}>
           <div
             className={`h-full rounded-full ${
               percentage > 90 ? "bg-red-500" : percentage > 70 ? "bg-amber-500" : "bg-cyan-500"
             }`}
-            style={{ width: `${percentage}%` }}
+            style={{ width: `${Math.min(100, Math.max(0, percentage))}%` }}
           />
         </Progress>
       </div>
@@ -1424,13 +1454,4 @@ function ActionButton({ icon: Icon, label }: { icon: LucideIcon; label: string }
       <span className="text-xs">{label}</span>
     </Button>
   )
-}
-
-// Add missing imports
-function Info(props) {
-  return <AlertCircle {...props} />
-}
-
-function Check(props) {
-  return <Shield {...props} />
 }
