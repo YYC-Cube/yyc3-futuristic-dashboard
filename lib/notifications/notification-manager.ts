@@ -8,29 +8,34 @@ class NotificationManager {
   private notifications: Notification[] = []
   private listeners: Set<(notifications: Notification[]) => void> = new Set()
   private unreadCount = 0
+  private isClient = false
 
   constructor() {
+    this.isClient = typeof window !== "undefined"
+
     // 初始化一些示例通知
-    this.addNotification({
-      type: "system",
-      priority: "medium",
-      title: "系统更新",
-      message: "新版本 v2.4.5 已准备就绪，建议在非高峰时段更新",
-    })
+    if (this.isClient) {
+      this.addNotification({
+        type: "system",
+        priority: "medium",
+        title: "系统更新",
+        message: "新版本 v2.4.5 已准备就绪，建议在非高峰时段更新",
+      })
 
-    this.addNotification({
-      type: "warning",
-      priority: "high",
-      title: "CPU 使用率警告",
-      message: "CPU 使用率持续超过 85%，建议检查系统负载",
-    })
+      this.addNotification({
+        type: "warning",
+        priority: "high",
+        title: "CPU 使用率警告",
+        message: "CPU 使用率持续超过 85%，建议检查系统负载",
+      })
 
-    this.addNotification({
-      type: "success",
-      priority: "low",
-      title: "备份完成",
-      message: "系统数据已成功备份到远程存储",
-    })
+      this.addNotification({
+        type: "success",
+        priority: "low",
+        title: "备份完成",
+        message: "系统数据已成功备份到远程存储",
+      })
+    }
   }
 
   addNotification(data: Omit<Notification, "id" | "timestamp" | "read">) {
@@ -116,6 +121,8 @@ class NotificationManager {
   }
 
   private showBrowserNotification(notification: Notification) {
+    if (!this.isClient) return
+
     if ("Notification" in window && Notification.permission === "granted") {
       new Notification(notification.title, {
         body: notification.message,
@@ -126,6 +133,8 @@ class NotificationManager {
   }
 
   requestPermission() {
+    if (!this.isClient) return
+
     if ("Notification" in window && Notification.permission === "default") {
       Notification.requestPermission()
     }
