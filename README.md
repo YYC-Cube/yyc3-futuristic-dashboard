@@ -62,6 +62,7 @@
 ## 目录总览（高层）
 项目以功能分层与模块化组件组织，便于维护与逐步扩展。
 
+```
 ├── app/                         # Next.js App Router 页面（页面/路由）
 │   ├── layout.tsx               # 全局布局（包含 AuthProvider）
 │   ├── page.tsx                 # 主页（仪表板）
@@ -116,6 +117,7 @@
 │   └── use-notifications.ts
 ├── dashboard.tsx                # 主仪表板（可被 app/page.tsx 包裹）
 └── public/                      # 静态资源（图标、图片、示例数据等）
+```
 
 ---
 
