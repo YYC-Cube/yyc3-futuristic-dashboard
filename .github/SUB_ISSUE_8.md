@@ -155,7 +155,6 @@ Potential future enhancements to this infrastructure:
 ## 👥 Maintainers
 
 - **Primary**: @YYC-Cube
-- **AI Assistant**: @Copilot
 
 ## 📅 Timeline
 

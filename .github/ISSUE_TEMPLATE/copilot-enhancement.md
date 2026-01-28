@@ -3,7 +3,7 @@ name: Copilot Enhancement
 about: Suggest an improvement or addition to the Copilot instructions
 title: '[Copilot] '
 labels: ['documentation', 'enhancement', 'copilot']
-assignees: ['Copilot']
+assignees: []
 ---
 
 ## 📝 Enhancement Description

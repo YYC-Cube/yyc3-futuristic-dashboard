@@ -106,6 +106,6 @@ Track the effectiveness of Copilot instructions:
 
 ---
 
-**Maintainers**: @YYC-Cube, @Copilot  
+**Maintainers**: @YYC-Cube  
 **Created**: 2026-01-28  
 **Related Issue**: #8
