@@ -10,6 +10,8 @@ This document serves to:
 - Plan future improvements to make Copilot more effective
 - Maintain a history of instruction evolution
 
+> 📌 **See Also**: [SUB_ISSUE_8.md](./SUB_ISSUE_8.md) - Comprehensive overview of the Copilot enhancement infrastructure
+
 ## 📊 Current Status
 
 **Base Issue**: #8 - ✅ Set up Copilot instructions (Completed)

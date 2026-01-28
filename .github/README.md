@@ -23,6 +23,7 @@ GitHub Actions CI/CD workflows:
 
 - **`copilot-instructions.md`**: Comprehensive instructions for GitHub Copilot agent
 - **`COPILOT_ENHANCEMENTS.md`**: Tracking document for Copilot instruction enhancements
+- **`SUB_ISSUE_8.md`**: Sub-issue documentation for issue #8 - Infrastructure overview
 
 ## 🤖 Copilot Instructions
 
