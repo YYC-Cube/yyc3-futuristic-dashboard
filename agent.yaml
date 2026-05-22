@@ -1,0 +1,157 @@
+agent:
+  name: yyc3-business-assistant
+  display_name: YYC3 智慧商家 AI 助手
+  description: |
+    面向 KTV/娱乐场所的智能业务助手，支持包厢管理、点单收银、
+    会员管理、库存查询、营业数据分析等业务场景的自然语言交互。
+  version: "1.0.0"
+  tags:
+    - hospitality
+    - ktv
+    - business-intelligence
+    - chinese
+
+model:
+  name: gpt-4o
+  temperature: 0.7
+  max_tokens: 2048
+  top_p: 0.95
+
+system_prompt: |
+  你是 YYC3 智慧商家管理系统的 AI 助手。你的职责是：
+
+  1. 业务查询：回答关于包厢状态、订单、商品、会员、库存等问题
+  2. 数据分析：提供营业数据分析、趋势解读、经营建议
+  3. 异常告警：识别异常数据（如库存不足、包厢超时）并提醒
+  4. 操作辅助：指导用户完成开房、点单、结账等业务操作
+
+  可用工具：
+  - getRoomStatus: 查询包厢状态
+  - getOrders: 查询订单信息
+  - getProducts: 查询商品列表
+  - getMembers: 查询会员信息
+  - getSalesReport: 获取销售报表
+  - getInventory: 查询库存状态
+
+  回复要求：
+  - 使用中文回复
+  - 数据查询结果用表格或列表展示
+  - 经营建议需基于数据支撑
+  - 对于不确定的信息，明确说明
+
+tools:
+  - name: getRoomStatus
+    description: 查询当前所有包厢的状态信息
+    type: function
+    parameters:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [available, occupied, cleaning, maintenance, reserved]
+          description: 按状态筛选（可选）
+      required: []
+
+  - name: getOrders
+    description: 查询订单列表
+    type: function
+    parameters:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [pending, confirmed, preparing, completed, cancelled]
+          description: 按订单状态筛选（可选）
+        date:
+          type: string
+          description: 日期筛选（YYYY-MM-DD，可选）
+      required: []
+
+  - name: getProducts
+    description: 查询商品列表及价格
+    type: function
+    parameters:
+      type: object
+      properties:
+        category:
+          type: string
+          description: 商品分类筛选（可选）
+      required: []
+
+  - name: getMembers
+    description: 查询会员信息
+    type: function
+    parameters:
+      type: object
+      properties:
+        phone:
+          type: string
+          description: 手机号查询（可选）
+        memberLevel:
+          type: string
+          enum: [silver, gold, platinum, diamond]
+          description: 会员等级筛选（可选）
+      required: []
+
+  - name: getSalesReport
+    description: 获取销售报表数据
+    type: function
+    parameters:
+      type: object
+      properties:
+        period:
+          type: string
+          enum: [today, week, month, custom]
+          description: 统计周期
+        startDate:
+          type: string
+          description: 自定义开始日期（YYYY-MM-DD）
+        endDate:
+          type: string
+          description: 自定义结束日期（YYYY-MM-DD）
+      required: ["period"]
+
+  - name: getInventory
+    description: 查询库存状态
+    type: function
+    parameters:
+      type: object
+      properties:
+        lowStockOnly:
+          type: boolean
+          description: 是否只显示低库存商品
+          default: false
+      required: []
+
+knowledge:
+  type: index
+  sources:
+    - name: business-faq
+      description: YYC3 常见业务问题和操作指南
+    - name: product-catalog
+      description: 商品目录和定价信息
+
+evaluation:
+  metrics:
+    - accuracy
+    - relevance
+    - coherence
+    - fluency
+  custom_metrics:
+    - name: business_correctness
+      description: 业务逻辑回答的正确性
+    - name: data_grounding
+      description: 回复是否基于真实数据
+  threshold:
+    accuracy: 0.85
+    relevance: 0.90
+    business_correctness: 0.80
+
+deployment:
+  endpoint: ${FOUNDRY_AGENT_ENDPOINT}
+  auth:
+    type: api_key
+    key: ${FOUNDRY_AGENT_API_KEY}
+  rate_limit:
+    requests_per_minute: 60
+    tokens_per_day: 100000
