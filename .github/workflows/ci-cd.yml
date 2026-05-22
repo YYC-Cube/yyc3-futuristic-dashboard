@@ -1,338 +1,55 @@
-name: 🚀 YYC3 Dashboard - CI/CD Pipeline
+name: 🚀 Deploy to GitHub Pages
 
 on:
   push:
-    branches: [main, develop]
-    paths-ignore:
-      - '**.md'
-      - 'docs/**'
-      - '.storybook/**'
-  pull_request:
     branches: [main]
   workflow_dispatch:
 
-env:
-  NODE_VERSION: '20'
-  PNPM_VERSION: '10'
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 
 jobs:
-  # ========================================
-  # Job 1: 代码质量检查
-  # ========================================
-  quality-check:
-    name: 🔍 Code Quality Check
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: 📥 Checkout code
-        uses: actions/checkout@v4
-
-      - name: 📦 Setup pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - name: 🟢 Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
-          registry-url: 'https://registry.npmmirror.com'
-
-      - name: 📥 Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: 🔤 TypeScript 类型检查
-        run: pnpm exec tsc --noEmit --pretty
-
-      - name: 🧹 ESLint 代码检查
-        run: pnpm lint
-        continue-on-error: true
-
-      - name: 📊 格式检查 (Prettier)
-        run: |
-          npx prettier --check "src/**/*.{ts,tsx,js,jsx}" "components/**/*.{ts,tsx}" || echo "⚠️ Format issues found"
-        continue-on-error: true
-
-  # ========================================
-  # Job 2: 单元测试 + 覆盖率
-  # ========================================
-  unit-tests:
-    name: 🧪 Unit Tests & Coverage
-    runs-on: ubuntu-latest
-    needs: quality-check
-    
-    steps:
-      - name: 📥 Checkout code
-        uses: actions/checkout@v4
-
-      - name: 📦 Setup pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - name: 🟢 Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
-          registry-url: 'https://registry.npmmirror.com'
-
-      - name: 📥 Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: 🧪 运行单元测试 (Vitest)
-        run: pnpm test:run --coverage
-        env:
-          CI: true
-
-      - name: 📊 上传覆盖率报告
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-report
-          path: coverage/
-          retention-days: 7
-
-      - name: ✅ 检查覆盖率阈值
-        run: |
-          if [ -f "coverage/coverage-summary.json" ]; then
-            COVERAGE=$(node -e "
-              const data = require('./coverage/coverage-summary.json');
-              const lines = data.total.lines.pct;
-              console.log(lines);
-            ")
-            echo "📊 当前代码覆盖率: ${COVERAGE}%"
-            if [ "$COVERAGE" -lt 60 ]; then
-              echo "❌ 覆盖率不足 60%，当前: ${COVERAGE}%"
-              exit 1
-            fi
-            echo "✅ 覆盖率达标!"
-          else
-            echo "⚠️ 未找到覆盖率报告，跳过检查"
-          fi
-
-  # ========================================
-  # Job 3: 构建验证
-  # ========================================
   build:
-    name: 🏗️ Build Verification
     runs-on: ubuntu-latest
-    needs: unit-tests
-    
-    strategy:
-      matrix:
-        node-version: ['20', '22']
-    
     steps:
-      - name: 📥 Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: 📦 Setup pnpm
-        uses: pnpm/action-setup@v3
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
         with:
-          version: ${{ env.PNPM_VERSION }}
+          version: 10
 
-      - name: 🟢 Setup Node.js ${{ matrix.node-version }}
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'pnpm'
-          registry-url: 'https://registry.npmmirror.com'
+          node-version: 20
+          cache: pnpm
 
-      - name: 📥 Install dependencies
+      - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: 🏗️ 构建 Next.js 应用 (Static Export)
+      - name: Build
         run: pnpm build
-        env:
-          NODE_ENV: production
-          NEXT_TELEMETRY_DISABLED: 1
 
-      - name: 📦 上传构建产物
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-output-${{ matrix.node-version }}
-          path: out/
-          retention-days: 7
-
-      - name: 📏 分析构建大小
-        run: |
-          echo "📊 Build Size Analysis:"
-          du -sh out/*
-          find out -name "*.js" -exec ls -lh {} \; | awk '{print $5, $9}' | sort -hr | head -10
-
-  # ========================================
-  # Job 4: E2E 测试（可选）
-  # ========================================
-  e2e-tests:
-    name: 🎭 E2E Tests (Playwright)
-    runs-on: ubuntu-latest
-    needs: build
-    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
-    
-    steps:
-      - name: 📥 Checkout code
-        uses: actions/checkout@v4
-
-      - name: 📦 Setup pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - name: 🟢 Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
-          registry-url: 'https://registry.npmmirror.com'
-
-      - name: 📥 Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: 🎭 安装 Playwright browsers
-        run: npx playwright install --with-deps chromium firefox webkit
-
-      - name: 🚀 启动开发服务器
-        run: |
-          pnpm dev &
-          sleep 15
-
-      - name: 🎭 运行 E2E 测试
-        run: pnpm test:e2e
-        continue-on-error: true
-
-      - name: 📤 上传测试结果
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: playwright-report
-          path: playwright-report/
-          retention-days: 7
-
-  # ========================================
-  # Job 5: 部署到 GitHub Pages
-  # ========================================
-  deploy:
-    name: 🚀 Deploy to GitHub Pages
-    runs-on: ubuntu-latest
-    needs: [build]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
-    
-    environment:
-      name: github-pages
-      url: https://futuristic.yyc3.top
-    
-    steps:
-      - name: 📥 Checkout code
-        uses: actions/checkout@v4
-
-      - name: 📦 Setup pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - name: 🟢 Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
-          registry-url: 'https://registry.npmmirror.com'
-
-      - name: 📥 Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: 🏗️ 构建生产版本
-        run: pnpm build
-        env:
-          NODE_ENV: production
-          NEXT_TELEMETRY_DISABLED: 1
-
-      - name: ⚙️ 配置 GitHub Pages
-        uses: actions/configure-pages@v4
-
-      - name: 📤 上传到 GitHub Pages
+      - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: out/
+          path: out
 
-      - name: 🚀 部署到 GitHub Pages
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-
-      - name: ✅ 部署成功通知
-        if: success()
-        run: |
-          echo "✅ 部署成功！"
-          echo "🌐 访问地址: https://futuristic.yyc3.top"
-          echo "🆔 部署 ID: ${{ steps.deployment.outputs.page_id }}"
-          echo "🕐 部署时间: $(date '+%Y-%m-%d %H:%M:%S UTC')"
-
-      - name: ❌ 部署失败通知
-        if: failure()
-        run: |
-          echo "❌ 部署失败！请检查日志。"
-
-  # ========================================
-  # Job 6: 安全扫描
-  # ========================================
-  security-scan:
-    name: 🔒 Security Scan
-    runs-on: ubuntu-latest
-    needs: quality-check
-    
-    steps:
-      - name: 📥 Checkout code
-        uses: actions/checkout@v4
-
-      - name: 📦 Setup pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - name: 🟢 Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
-          registry-url: 'https://registry.npmmirror.com'
-
-      - name: 📥 Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: 🔒 运行安全审计
-        run: pnpm audit --audit-level=moderate
-        continue-on-error: true
-
-      - name: 🔍 依赖漏洞扫描
-        run: npx npm-audit-ci-only --moderate || echo "⚠️ 发现依赖漏洞，请查看详细报告"
-        continue-on-error: true
-
-# ========================================
-# 完成后的总结
-# ========================================
-conclusion:
-  name: 📋 Summary
-  runs-on: ubuntu-latest
-  needs: [quality-check, unit-tests, build, deploy]
-  if: always()
-  
-  steps:
-    - name: 📊 Pipeline 总结
-      run: |
-        echo "========================================="
-        echo "  🚀 YYC3 Dashboard CI/CD Pipeline"
-        echo "========================================="
-        echo ""
-        echo "✅ Quality Check: ${{ needs.quality-check.result }}"
-        echo "✅ Unit Tests: ${{ needs.unit-tests.result }}"
-        echo "✅ Build: ${{ needs.build.result }}"
-        echo "✅ Deploy: ${{ needs.deploy.result }}"
-        echo ""
-        echo "🌐 Production URL: https://futuristic.yyc3.top"
-        echo "📅 Deployed at: $(date)"
-        echo "========================================="
