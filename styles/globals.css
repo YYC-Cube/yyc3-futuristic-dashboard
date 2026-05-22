@@ -90,5 +90,27 @@ body {
   }
   body {
     @apply bg-background text-foreground;
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+.dark {
+  color-scheme: dark;
+}
+
+.theme-transitioning,
+.theme-transitioning *,
+.theme-transitioning *::before,
+.theme-transitioning *::after {
+  transition: 
+    background-color 300ms ease !important,
+    color 300ms ease !important,
+    border-color 300ms ease !important,
+    box-shadow 300ms ease !important,
+    fill 300ms ease !important,
+    stroke 300ms ease !important;
 }

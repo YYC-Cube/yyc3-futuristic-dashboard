@@ -9,7 +9,7 @@ import GroupManagement from "@/components/employee/group-management"
 export default function EmployeesPage() {
   return (
     <Tabs defaultValue="profile" className="space-y-4">
-      <TabsList className="bg-slate-800 border-slate-700">
+      <TabsList className="bg-muted/50 border-border/50 backdrop-blur-sm">
         <TabsTrigger value="profile">员工档案</TabsTrigger>
         <TabsTrigger value="add">添加员工</TabsTrigger>
         <TabsTrigger value="permissions">权限管理</TabsTrigger>

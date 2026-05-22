@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { ThemeProvider } from '@/components/theme-provider'
 import { ErrorBoundary } from '@/components/common/error-boundary'
 import AppShell from '@/components/common/app-shell'
+import { GhostModeDevTools } from '@/components/ui/ghost-mode-devtools'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -21,13 +22,14 @@ export default function RootLayout({
           attribute="class"
           defaultTheme="dark"
           enableSystem
-          disableTransitionOnChange
+          disableTransitionOnChange={false}
         >
           <ErrorBoundary>
             <AppShell>
               {children}
             </AppShell>
           </ErrorBoundary>
+          <GhostModeDevTools />
         </ThemeProvider>
       </body>
     </html>

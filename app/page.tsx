@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { useRoomStore } from "@/lib/stores/useRoomStore"
 import { useOrderStore } from "@/lib/stores/useOrderStore"
@@ -56,90 +56,97 @@ export default function HomePage() {
           <h1 className="text-3xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
             YYC3 智慧商家管理系统
           </h1>
-          <p className="text-slate-400 mt-1">
+          <p className="text-muted-foreground mt-1">
             {currentTime.toLocaleDateString("zh-CN", { year: "numeric", month: "long", day: "numeric", weekday: "long" })}
             {" "}
             {currentTime.toLocaleTimeString("zh-CN")}
           </p>
         </div>
-        <Badge className="bg-green-500/20 text-green-400 border-green-500/50 text-sm px-3 py-1">
+        <Badge variant="secondary" className="text-sm px-3 py-1">
           <Activity className="h-3 w-3 mr-1" />
           系统运行中
         </Badge>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="bg-slate-800/50 border-slate-700/50">
+        <Card className="bg-card/50 border-border/50 backdrop-blur-sm">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-slate-400">空闲包厢</p>
-                <p className="text-2xl font-bold text-green-400">{stats.available}</p>
+                <p className="text-sm text-muted-foreground">空闲包厢</p>
+                <p className="text-2xl font-bold text-green-500">{stats.available}</p>
               </div>
-              <Home className="h-8 w-8 text-green-500/50" />
+              <Home className="h-8 w-8 text-green-500/30" />
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-slate-800/50 border-slate-700/50">
+        <Card className="bg-card/50 border-border/50 backdrop-blur-sm">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-slate-400">消费中</p>
-                <p className="text-2xl font-bold text-orange-400">{stats.occupied}</p>
+                <p className="text-sm text-muted-foreground">消费中</p>
+                <p className="text-2xl font-bold text-orange-500">{stats.occupied}</p>
               </div>
-              <Activity className="h-8 w-8 text-orange-500/50" />
+              <Activity className="h-8 w-8 text-orange-500/30" />
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-slate-800/50 border-slate-700/50">
+        <Card className="bg-card/50 border-border/50 backdrop-blur-sm">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-slate-400">总包厢数</p>
-                <p className="text-2xl font-bold text-cyan-400">{stats.total}</p>
+                <p className="text-sm text-muted-foreground">总包厢数</p>
+                <p className="text-2xl font-bold text-cyan-500">{stats.total}</p>
               </div>
-              <TrendingUp className="h-8 w-8 text-cyan-500/50" />
+              <TrendingUp className="h-8 w-8 text-cyan-500/30" />
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-slate-800/50 border-slate-700/50">
+        <Card className="bg-card/50 border-border/50 backdrop-blur-sm">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-slate-400">今日订单</p>
-                <p className="text-2xl font-bold text-purple-400">{orders.length}</p>
+                <p className="text-sm text-muted-foreground">今日订单</p>
+                <p className="text-2xl font-bold text-purple-500">{orders.length}</p>
               </div>
-              <ClipboardList className="h-8 w-8 text-purple-500/50" />
+              <ClipboardList className="h-8 w-8 text-purple-500/30" />
             </div>
           </CardContent>
         </Card>
       </div>
 
       <div>
-        <h2 className="text-xl font-semibold text-white mb-4">功能导航</h2>
+        <h2 className="text-xl font-semibold text-foreground mb-4">功能导航</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {navCards.map((card) => (
             <Link key={card.href} href={card.href}>
-              <Card className="bg-slate-800/50 border-slate-700/50 hover:border-slate-600 hover:bg-slate-800/80 transition-all duration-200 cursor-pointer group h-full">
+              <Card className="bg-card/50 border-border/50 hover:border-primary/50 hover:bg-card/80 transition-all duration-200 cursor-pointer group h-full backdrop-blur-sm">
                 <CardContent className="p-5">
                   <div className="flex items-start justify-between">
                     <div className={`p-2.5 rounded-lg bg-gradient-to-br ${card.color} bg-opacity-20`}>
                       <card.icon className="h-5 w-5 text-white" />
                     </div>
                     {card.badge && (
-                      <Badge className="bg-cyan-500/20 text-cyan-400 border-cyan-500/50 text-xs">
+                      <Badge variant="secondary" className="text-xs">
                         {card.badge}
                       </Badge>
                     )}
                   </div>
-                  <h3 className="text-lg font-semibold text-white mt-3 group-hover:text-cyan-400 transition-colors">
+                  <h3 className="text-lg font-semibold text-foreground mt-3 group-hover:text-cyan-500 transition-colors">
                     {card.title}
                   </h3>
-                  <p className="text-sm text-slate-400 mt-1">{card.description}</p>
+                  <p className="text-sm text-muted-foreground mt-1">{card.description}</p>
                 </CardContent>
               </Card>
             </Link>
           ))}
+        </div>
+      </div>
+
+      {/* Ghost Mode Indicator */}
+      <div className="fixed bottom-4 left-4 z-40 opacity-0 hover:opacity-100 transition-opacity duration-300">
+        <div className="px-3 py-1.5 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 text-[10px] text-muted-foreground">
+          🌙 Ghost Mode · ⌘D 切换
         </div>
       </div>
     </div>
