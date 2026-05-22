@@ -1,19 +1,4 @@
----
-file: README.md
-description: YYC³ 智慧商家管理系统 — 五维驱动五高标准体系完整实现，基于 Next.js + React + shadcn/ui 的企业级 SaaS 平台
-author: YanYuCloudCube Team <admin@0379.email>
-version: v1.0.0
-created: 2026-05-22
-updated: 2026-05-22
-status: stable
-tags: [nextjs],[react],[dashboard],[saas],[ai],[enterprise]
-category: project
-language: zh-CN
-audience: developers,stakeholders,managers
-complexity: intermediate
-project: yyc3-futuristic-dashboard
-phase: production
----
+# YYC³ 智慧商家管理系统
 
 > ***YanYuCloudCube***
 > *言启象限 | 语枢未来*
