@@ -1,3 +1,4 @@
+import { createHash } from "crypto"
 import NextAuth from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import { z } from "zod"
@@ -6,6 +7,69 @@ const loginSchema = z.object({
   username: z.string().min(1, "用户名不能为空"),
   password: z.string().min(6, "密码至少6位"),
 })
+
+type TestAccount = {
+  id: string
+  name: string
+  email: string
+  role: "admin" | "manager" | "staff"
+  employeeNumber: string
+  position: string
+  department: string
+  permissions: string[]
+  passwordHash: string
+}
+
+function simpleHash(input: string): string {
+  return createHash("sha256").update(input).digest("hex").slice(0, 16)
+}
+
+const TEST_ACCOUNTS: Record<string, TestAccount> = {
+  yyc3_admin: {
+    id: "emp-001",
+    name: "系统管理员",
+    email: "admin@yyc3.cn",
+    role: "admin",
+    employeeNumber: "EMP001",
+    position: "系统管理员",
+    department: "技术部",
+    permissions: ["all"],
+    passwordHash: simpleHash("YYC3@Admin2026"),
+  },
+  yyc3_manager: {
+    id: "emp-002",
+    name: "王经理",
+    email: "manager@yyc3.cn",
+    role: "manager",
+    employeeNumber: "EMP002",
+    position: "运营经理",
+    department: "管理部",
+    permissions: ["rooms", "orders", "members", "employees", "inventory", "reports"],
+    passwordHash: simpleHash("YYC3@Manager2026"),
+  },
+  yyc3_staff: {
+    id: "emp-003",
+    name: "小李",
+    email: "staff@yyc3.cn",
+    role: "staff",
+    employeeNumber: "EMP003",
+    position: "服务员",
+    department: "服务部",
+    permissions: ["rooms", "orders"],
+    passwordHash: simpleHash("YYC3@Staff2026"),
+  },
+  admin: {
+    id: "emp-001",
+    name: "管理员",
+    email: "admin@yyc3.com",
+    role: "admin",
+    employeeNumber: "EMP001",
+    position: "系统管理员",
+    department: "技术部",
+    permissions: ["all"],
+    passwordHash: simpleHash("123456"),
+  },
+}
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
@@ -19,18 +83,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         try {
           const validated = loginSchema.parse(credentials)
 
-          // TODO: 替换为真实的 API 调用
-          if (validated.username === "admin" && validated.password === "123456") {
-            return {
-              id: "emp-001",
-              name: "管理员",
-              email: "admin@yyc3.com",
-              role: "admin",
-              employeeNumber: "EMP001",
-              position: "系统管理员",
-              department: "技术部",
-              permissions: ["all"],
-            }
+          const account = TEST_ACCOUNTS[validated.username]
+          if (account && account.passwordHash === simpleHash(validated.password)) {
+            const { passwordHash: _, ...safeAccount } = account
+            return safeAccount
           }
 
           return null

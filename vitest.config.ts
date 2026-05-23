@@ -11,7 +11,28 @@ export default defineConfig({
     include: ["**/__tests__/**/*.test.{ts,tsx}"],
     coverage: {
       provider: "v8",
-      include: ["lib/stores/**", "lib/services/**", "lib/api/**"],
+      include: [
+        "lib/stores/**",
+        "lib/services/**",
+        "lib/api/**",
+        "lib/auth/**",
+        "lib/hooks/**",
+        "lib/utils.ts",
+        "lib/cache/**",
+      ],
+      exclude: [
+        "**/*.d.ts",
+        "**/types.ts",
+        "**/index.ts",
+        "**/node_modules/**",
+        "**/__tests__/**",
+      ],
+      thresholds: {
+        statements: 50,
+        branches: 40,
+        functions: 50,
+        lines: 50,
+      },
     },
   },
   resolve: {

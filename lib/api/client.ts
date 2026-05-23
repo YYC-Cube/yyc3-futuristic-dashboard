@@ -112,14 +112,38 @@ const mockData = {
     {
       id: "emp-001",
       employeeNumber: "EMP001",
+      name: "系统管理员",
+      phone: "13700137001",
+      position: "manager",
+      department: "技术部",
+      isActive: true,
+      permissions: ["all"],
+      role: "admin" as const,
+      createdAt: "2023-01-15",
+    },
+    {
+      id: "emp-002",
+      employeeNumber: "EMP002",
       name: "王经理",
-      phone: "13700137000",
+      phone: "13700137002",
       position: "manager",
       department: "管理部",
       isActive: true,
-      permissions: ["all"],
+      permissions: ["rooms", "orders", "members", "employees", "inventory", "reports"],
       role: "manager" as const,
-      createdAt: "2023-01-15",
+      createdAt: "2023-03-20",
+    },
+    {
+      id: "emp-003",
+      employeeNumber: "EMP003",
+      name: "小李",
+      phone: "13700137003",
+      position: "staff",
+      department: "服务部",
+      isActive: true,
+      permissions: ["rooms", "orders"],
+      role: "staff" as const,
+      createdAt: "2024-06-10",
     },
   ] satisfies Employee[],
 }
@@ -245,7 +269,16 @@ class ApiClient {
   // 认证相关
   async login(username: string, password: string) {
     const mockToken = "mock-jwt-token-" + Date.now()
-    const mockUser = mockData.employees[0]
+
+    const accountMap: Record<string, number> = {
+      "yyc3_admin": 0,
+      "admin": 0,
+      "yyc3_manager": 1,
+      "yyc3_staff": 2,
+    }
+
+    const index = accountMap[username] ?? 0
+    const mockUser = mockData.employees[index]
 
     if (this.isClient) {
       try {

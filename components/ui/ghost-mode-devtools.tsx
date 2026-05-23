@@ -2,7 +2,8 @@
 
 import * as React from 'react'
 import { useTheme } from 'next-themes'
-import { Moon, Sun, Monitor, Palette, Info, Copy, Check } from 'lucide-react'
+import Link from 'next/link'
+import { Moon, Sun, Monitor, Palette, Info, Copy, Check, Sparkles, ExternalLink } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export function GhostModeDevTools() {
@@ -156,6 +157,23 @@ export function GhostModeDevTools() {
                 </pre>
               </div>
             </details>
+
+            {/* Theme Customizer Link */}
+            <Link
+              href="/theme"
+              onClick={() => setIsOpen(false)}
+              className={cn(
+                "flex items-center justify-center gap-2 w-full rounded-lg",
+                "bg-gradient-to-r from-purple-600 to-blue-600 text-white",
+                "py-3 px-4 text-sm font-medium shadow-md",
+                "hover:from-purple-500 hover:to-blue-500 hover:shadow-lg transition-all duration-300",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              )}
+            >
+              <Sparkles className="h-4 w-4" />
+              主题定制中心
+              <ExternalLink className="h-3 w-3 ml-auto" />
+            </Link>
           </div>
         </div>
       )}

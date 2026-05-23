@@ -1,13 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: "export",
-  
-  eslint: {
-    ignoreDuringBuilds: false,
-  },
+
   typescript: {
     ignoreBuildErrors: false,
   },
+
+  serverExternalPackages: ["@sentry/nextjs"],
 
   images: {
     unoptimized: true,
@@ -37,7 +36,6 @@ const nextConfig = {
   experimental: {
     optimizeCss: true,
     optimizePackageImports: ["lucide-react", "@radix-ui/react-icons"],
-    serverComponentsExternalPackages: ["@sentry/nextjs"],
   },
 
   async headers() {

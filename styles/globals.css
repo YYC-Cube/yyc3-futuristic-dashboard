@@ -114,3 +114,17 @@ html {
     fill 300ms ease !important,
     stroke 300ms ease !important;
 }
+
+/* Ghost Mode Shimmer Animation */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 1.5s infinite;
+}

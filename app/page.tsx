@@ -30,11 +30,13 @@ const navCards: NavCard[] = [
   { title: "库存管理", description: "出入库管理、库存预警、仓库配置", href: "/inventory", icon: Warehouse, color: "from-yellow-500 to-orange-600" },
   { title: "报表分析", description: "营业数据、趋势图表、经营洞察", href: "/reports", icon: BarChart3, color: "from-teal-500 to-cyan-600" },
   { title: "系统设置", description: "门店配置、打印机、支付方式", href: "/settings", icon: Settings, color: "from-slate-500 to-gray-600" },
+  { title: "主题定制", description: "12种预设、自定义配色、导入导出", href: "/theme", icon: TrendingUp, color: "from-violet-500 to-purple-600", badge: "新功能" },
+  { title: "主题市场", description: "社区主题、AI推荐、动态壁纸", href: "/market", icon: Activity, color: "from-fuchsia-500 to-pink-600", badge: "热门" },
 ]
 
 export default function HomePage() {
   const { rooms, fetchRooms, getRoomStats } = useRoomStore()
-  const { orders, fetchOrders } = useOrderStore()
+  const { orders, fetchOrders, getOrderCount } = useOrderStore()
   const [currentTime, setCurrentTime] = useState(new Date())
 
   useEffect(() => {
@@ -48,6 +50,9 @@ export default function HomePage() {
   }, [])
 
   const stats = getRoomStats()
+  
+  // 安全获取订单数量（使用辅助方法或可选链）
+  const orderCount = getOrderCount ? getOrderCount() : (orders?.length ?? 0)
 
   return (
     <div className="space-y-8 p-2">
@@ -107,7 +112,7 @@ export default function HomePage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">今日订单</p>
-                <p className="text-2xl font-bold text-purple-500">{orders.length}</p>
+                <p className="text-2xl font-bold text-purple-500">{orderCount}</p>
               </div>
               <ClipboardList className="h-8 w-8 text-purple-500/30" />
             </div>

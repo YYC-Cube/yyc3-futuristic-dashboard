@@ -8,25 +8,36 @@ export interface User {
   avatar?: string
 }
 
-interface AuthState {
+interface AuthStoreState {
   user: User | null
   token: string | null
   isAuthenticated: boolean
   loading: boolean
   error: string | null
+}
 
+interface AuthStoreActions {
   login: (username: string, password: string) => Promise<boolean>
+  ghostModeLogin: () => void
   logout: () => void
   loadFromStorage: () => void
   clearError: () => void
+  reset: () => void
+
+  getUserSafe: () => User | null
+  getTokenSafe: () => string | null
+  isAdmin: () => boolean
+  hasRole: (role: User["role"]) => boolean
 }
+
+type AuthStore = AuthStoreState & AuthStoreActions
 
 const TOKEN_KEY = "yyc3_auth_token"
 const USER_KEY = "yyc3_auth_user"
 
-export const useAuthStore = create<AuthState>()(
+export const useAuthStore = create<AuthStore>()(
   devtools(
-    (set) => ({
+    (set, get) => ({
       user: null,
       token: null,
       isAuthenticated: false,
@@ -43,23 +54,58 @@ export const useAuthStore = create<AuthState>()(
             try {
               localStorage.setItem(TOKEN_KEY, token)
               localStorage.setItem(USER_KEY, JSON.stringify(user))
-            } catch {}
+            } catch (storageError) {
+              console.warn("⚠️ [AuthStore] localStorage write failed:", storageError)
+            }
             set({ user, token, isAuthenticated: true, loading: false })
             return true
           }
           set({ error: response.message || "登录失败", loading: false })
           return false
-        } catch {
+        } catch (err) {
+          console.error("❌ [AuthStore] Login failed:", err)
           set({ error: "网络错误，请重试", loading: false })
           return false
         }
+      },
+
+      ghostModeLogin: () => {
+        const ghostUser: User = {
+          id: 'ghost-dev-user',
+          name: '👻 幽灵开发者',
+          role: 'admin',
+          avatar: undefined,
+        }
+
+        const ghostToken = `ghost_token_${Date.now()}_dev_only`
+
+        try {
+          localStorage.setItem(TOKEN_KEY, ghostToken)
+          localStorage.setItem(USER_KEY, JSON.stringify(ghostUser))
+        } catch (storageError) {
+          console.warn("⚠️ [AuthStore] Ghost mode localStorage write failed:", storageError)
+        }
+
+        set({
+          user: ghostUser,
+          token: ghostToken,
+          isAuthenticated: true,
+          error: null,
+        })
+
+        console.log('👻 Ghost Mode Login Successful!')
+        console.log('📝 User:', ghostUser.name)
+        console.log('🔑 Role:', ghostUser.role)
+        console.log('⚠️  This is development mode only!')
       },
 
       logout: () => {
         try {
           localStorage.removeItem(TOKEN_KEY)
           localStorage.removeItem(USER_KEY)
-        } catch {}
+        } catch (storageError) {
+          console.warn("⚠️ [AuthStore] localStorage remove failed:", storageError)
+        }
         set({ user: null, token: null, isAuthenticated: false })
       },
 
@@ -71,13 +117,40 @@ export const useAuthStore = create<AuthState>()(
             const user = JSON.parse(userJson) as User
             set({ user, token, isAuthenticated: true })
           }
-        } catch {
+        } catch (err) {
+          console.error("❌ [AuthStore] loadFromStorage failed:", err)
           set({ user: null, token: null, isAuthenticated: false })
         }
       },
 
       clearError: () => set({ error: null }),
+
+      reset: () => {
+        try {
+          localStorage.removeItem(TOKEN_KEY)
+          localStorage.removeItem(USER_KEY)
+        } catch (storageError) {
+          console.warn("⚠️ [AuthStore] Reset cleanup failed:", storageError)
+        }
+        set({
+          user: null,
+          token: null,
+          isAuthenticated: false,
+          loading: false,
+          error: null,
+        })
+      },
+
+      getUserSafe: () => get().user ?? null,
+
+      getTokenSafe: () => get().token ?? null,
+
+      isAdmin: () => get().user?.role === "admin",
+
+      hasRole: (role) => get().user?.role === role,
     }),
     { name: "AuthStore" }
   )
 )
+
+export type { AuthStoreState, AuthStoreActions }
