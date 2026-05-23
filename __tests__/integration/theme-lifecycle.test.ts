@@ -6,13 +6,12 @@ describe('主题市场完整流程集成测试', () => {
   beforeEach(() => {
     useThemeMarketStore.setState({
       themes: [],
-      selectedTheme: null,
       userVotes: {},
-      filters: {
-        category: 'all',
-        sortBy: 'popular',
-        searchQuery: '',
-      },
+      searchQuery: '',
+      selectedCategory: 'all',
+      sortBy: 'popular',
+      loading: false,
+      error: null,
     })
 
     useThemeConfigStore.setState({
@@ -29,19 +28,13 @@ describe('主题市场完整流程集成测试', () => {
           id: 'theme-001',
           name: '海洋蓝调',
           author: '设计师A',
-          category: 'business',
-          downloads: 1500,
-          rating: 4.8,
-          votes: 230,
+          metadata: { category: 'business', downloads: 1500, rating: 4.8 },
         },
         {
           id: 'theme-002',
           name: '森林绿意',
           author: '设计师B',
-          category: 'nature',
-          downloads: 800,
-          rating: 4.5,
-          votes: 120,
+          metadata: { category: 'nature', downloads: 800, rating: 4.5 },
         },
       ] as any
 
@@ -51,15 +44,8 @@ describe('主题市场完整流程集成测试', () => {
       expect(themes.length).toBe(2)
       expect(themes[0].name).toBe('海洋蓝调')
 
-      if (typeof useThemeMarketStore.getState().selectTheme === 'function') {
-        useThemeMarketStore.getState().selectTheme(mockThemes[0])
-        expect(useThemeMarketStore.getState().selectedTheme?.id).toBe('theme-001')
-      }
-
-      if (typeof useThemeMarketStore.getState().voteForTheme === 'function') {
-        useThemeMarketStore.getState().voteForTheme('theme-001', 5)
-        expect(useThemeMarketStore.getState().userVotes['theme-001']).toBe(5)
-      }
+      useThemeMarketStore.getState().voteTheme('theme-001', 'up')
+      expect(useThemeMarketStore.getState().userVotes['theme-001']).toBe('up')
 
       if (typeof useThemeConfigStore.getState().setActivePreset === 'function') {
         useThemeConfigStore.getState().setActivePreset('ocean-blue')
@@ -77,65 +63,43 @@ describe('主题市场完整流程集成测试', () => {
   describe('筛选和排序集成', () => {
     it('应该支持按类别筛选并应用主题', () => {
       const themes = [
-        { id: '1', category: 'business' },
-        { id: '2', category: 'nature' },
-        { id: '3', category: 'business' },
-        { id: '4', category: 'tech' },
+        { id: '1', tags: ['business'], metadata: { category: 'business' } },
+        { id: '2', tags: ['nature'], metadata: { category: 'nature' } },
+        { id: '3', tags: ['business'], metadata: { category: 'business' } },
+        { id: '4', tags: ['tech'], metadata: { category: 'tech' } },
       ] as any
 
       useThemeMarketStore.setState({ themes })
 
-      if (typeof useThemeMarketStore.getState().setFilter === 'function') {
-        useThemeMarketStore.getState().setFilter('category', 'business')
-        expect(useThemeMarketStore.getState().filters.category).toBe('business')
-      }
+      useThemeMarketStore.getState().setCategory('business')
+      expect(useThemeMarketStore.getState().selectedCategory).toBe('business')
 
-      const currentThemes = useThemeMarketStore.getState().themes
-      expect(currentThemes.length).toBe(4)
-      const businessThemes = currentThemes.filter((t: any) => t.category === 'business')
-      expect(businessThemes.length).toBe(2)
-
-      if (businessThemes.length > 0 && typeof useThemeMarketStore.getState().selectTheme === 'function') {
-        try {
-          useThemeMarketStore.getState().selectTheme(businessThemes[0])
-          if (useThemeMarketStore.getState().selectedTheme) {
-            expect(useThemeMarketStore.getState().selectedTheme?.category).toBe('business')
-          }
-        } catch (error) {
-          expect(error).toBeDefined()
-        }
-      }
+      const filtered = useThemeMarketStore.getState().getFilteredThemes()
+      expect(filtered.length).toBe(2)
+      expect(filtered.every((t: any) => t.metadata.category === 'business')).toBe(true)
     })
   })
 
   describe('用户偏好持久化', () => {
     it('应该在投票后保持用户偏好', () => {
-      if (typeof useThemeMarketStore.getState().voteForTheme === 'function') {
-        useThemeMarketStore.getState().voteForTheme('theme-001', 4)
-        useThemeMarketStore.getState().voteForTheme('theme-002', 5)
-
-        const votes = useThemeMarketStore.getState().userVotes
-        expect(votes['theme-001']).toBe(4)
-        expect(votes['theme-002']).toBe(5)
-        expect(Object.keys(votes).length).toBe(2)
-      }
-    })
-
-    it('应该在切换主题后保留用户偏好设置', () => {
-      useThemeMarketStore.setState({
-        userVotes: { 'theme-001': 4 },
-        selectedTheme: { id: 'theme-001', name: '旧主题' } as any,
-      })
-
-      if (typeof useThemeMarketStore.getState().selectTheme === 'function') {
-        useThemeMarketStore.getState().selectTheme(
-          { id: 'theme-002', name: '新主题' } as any
-        )
-        expect(useThemeMarketStore.getState().selectedTheme?.id).toBe('theme-002')
-      }
+      useThemeMarketStore.getState().voteTheme('theme-001', 'up')
+      useThemeMarketStore.getState().voteTheme('theme-002', 'down')
 
       const votes = useThemeMarketStore.getState().userVotes
-      expect(votes['theme-001']).toBe(4)
+      expect(votes['theme-001']).toBe('up')
+      expect(votes['theme-002']).toBe('down')
+      expect(Object.keys(votes).length).toBe(2)
+    })
+
+    it('应该在切换投票后更新偏好', () => {
+      useThemeMarketStore.setState({
+        userVotes: { 'theme-001': 'up' },
+      })
+
+      useThemeMarketStore.getState().voteTheme('theme-001', 'down')
+
+      const votes = useThemeMarketStore.getState().userVotes
+      expect(votes['theme-001']).toBe('down')
     })
   })
 

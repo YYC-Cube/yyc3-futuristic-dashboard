@@ -13,9 +13,9 @@ describe('orderService', () => {
       expect(result).not.toBeNull()
 
       if (result && 'orders' in result) {
-        expect(Array.isArray(result.orders)).toBe(true)
+        expect(Array.isArray((result as any).orders)).toBe(true)
       } else if (result && 'data' in result) {
-        expect(Array.isArray(result.data)).toBe(true)
+        expect(Array.isArray((result as any).data)).toBe(true)
       }
     })
 
@@ -87,12 +87,12 @@ describe('orderService', () => {
   describe('update', () => {
     it('应该更新订单信息并返回更新后的数据', async () => {
       const orderId = 'order-test-001'
-      const updateData = {
+      const updateData: Partial<{ discount: number; paymentStatus: string }> = {
         discount: 50,
-        paymentStatus: 'partial_paid' as const,
+        paymentStatus: 'partial',
       }
 
-      const result = await orderService.update(orderId, updateData)
+      const result = await orderService.update(orderId, updateData as any)
 
       expect(result).toBeDefined()
       if (result) {

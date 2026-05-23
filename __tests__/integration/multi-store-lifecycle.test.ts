@@ -7,9 +7,10 @@ describe('多门店管理完整流程集成测试', () => {
   beforeEach(() => {
     useMultiStoreStore.setState({
       stores: [],
-      currentStoreId: null,
+      activeStoreId: null,
       loading: false,
       error: null,
+      lastFetched: null,
     })
 
     useRoomStore.setState({
@@ -32,13 +33,13 @@ describe('多门店管理完整流程集成测试', () => {
   describe('门店切换与数据隔离', () => {
     it('应该支持门店切换并保持数据隔离', () => {
       const stores = [
-        { id: 'store-001', name: '总店', location: '北京' },
-        { id: 'store-002', name: '分店A', location: '上海' },
-        { id: 'store-003', name: '分店B', location: '广州' },
+        { id: 'store-001', name: '总店' },
+        { id: 'store-002', name: '分店A' },
+        { id: 'store-003', name: '分店B' },
       ] as any
 
-      useMultiStoreStore.setState({ stores, currentStoreId: 'store-001' })
-      expect(useMultiStoreStore.getState().currentStoreId).toBe('store-001')
+      useMultiStoreStore.setState({ stores, activeStoreId: 'store-001' })
+      expect(useMultiStoreStore.getState().activeStoreId).toBe('store-001')
 
       const storeRooms = [
         { id: 'room-001', storeId: 'store-001', status: 'available' },
@@ -48,10 +49,8 @@ describe('多门店管理完整流程集成测试', () => {
       useRoomStore.setState({ rooms: storeRooms })
       expect(useRoomStore.getState().rooms.length).toBe(2)
 
-      if (typeof useMultiStoreStore.getState().switchStore === 'function') {
-        useMultiStoreStore.getState().switchStore('store-002')
-        expect(useMultiStoreStore.getState().currentStoreId).toBe('store-002')
-      }
+      useMultiStoreStore.getState().setActiveStore('store-002')
+      expect(useMultiStoreStore.getState().activeStoreId).toBe('store-002')
 
       useRoomStore.setState({ rooms: [] })
       expect(useRoomStore.getState().rooms.length).toBe(0)
@@ -60,15 +59,13 @@ describe('多门店管理完整流程集成测试', () => {
 
   describe('权限控制集成', () => {
     it('应该支持基于角色的门店访问控制', () => {
-      if (typeof useAuthStore.getState().ghostModeLogin === 'function') {
-        useAuthStore.getState().ghostModeLogin()
-        expect(useAuthStore.getState().isAdmin()).toBe(true)
-      }
+      useAuthStore.getState().ghostModeLogin()
+      expect(useAuthStore.getState().isAdmin()).toBe(true)
 
       const adminStores = [
-        { id: 'store-001', name: '总店', accessLevel: 'full' },
-        { id: 'store-002', name: '分店A', accessLevel: 'full' },
-        { id: 'store-003', name: '分店B', accessLevel: 'full' },
+        { id: 'store-001', name: '总店', status: 'active' },
+        { id: 'store-002', name: '分店A', status: 'active' },
+        { id: 'store-003', name: '分店B', status: 'active' },
       ] as any
 
       useMultiStoreStore.setState({ stores: adminStores })
@@ -80,7 +77,7 @@ describe('多门店管理完整流程集成测试', () => {
       })
 
       const staffStores = [
-        { id: 'store-002', name: '分店A', accessLevel: 'limited' },
+        { id: 'store-002', name: '分店A', status: 'active' },
       ] as any
 
       useMultiStoreStore.setState({ stores: staffStores })
@@ -91,9 +88,9 @@ describe('多门店管理完整流程集成测试', () => {
   describe('跨门店操作', () => {
     it('应该支持查看所有门店的汇总数据', () => {
       const allStores = [
-        { id: 'store-001', name: '总店', totalRooms: 10, occupiedRooms: 7 },
-        { id: 'store-002', name: '分店A', totalRooms: 8, occupiedRooms: 5 },
-        { id: 'store-003', name: '分店B', totalRooms: 6, occupiedRooms: 2 },
+        { id: 'store-001', name: '总店', stats: { totalRooms: 10, occupiedRooms: 7 } },
+        { id: 'store-002', name: '分店A', stats: { totalRooms: 8, occupiedRooms: 5 } },
+        { id: 'store-003', name: '分店B', stats: { totalRooms: 6, occupiedRooms: 2 } },
       ] as any
 
       useMultiStoreStore.setState({ stores: allStores })
@@ -104,7 +101,7 @@ describe('多门店管理完整流程集成测试', () => {
       expect(Array.isArray(state.stores)).toBe(true)
 
       const totalRooms = (state.stores as any[]).reduce(
-        (sum, store) => sum + (store.totalRooms || 0),
+        (sum: number, store: any) => sum + (store.stats?.totalRooms || 0),
         0
       )
       expect(totalRooms).toBe(24)
@@ -114,16 +111,16 @@ describe('多门店管理完整流程集成测试', () => {
   describe('数据同步集成', () => {
     it('应该支持多门店数据的批量更新', async () => {
       const initialStores = [
-        { id: 'store-001', name: '总店', syncStatus: 'synced' },
-        { id: 'store-002', name: '分店A', syncStatus: 'pending' },
+        { id: 'store-001', name: '总店', status: 'active' },
+        { id: 'store-002', name: '分店A', status: 'maintenance' },
       ] as any
 
       useMultiStoreStore.setState({ stores: initialStores })
 
-      const updatedStores = initialStores.map((store) => ({
+      const updatedStores = (initialStores as any[]).map((store: any) => ({
         ...store,
-        syncStatus: 'synced',
-        lastSyncTime: new Date().toISOString(),
+        status: 'active',
+        updatedAt: new Date().toISOString(),
       })) as any
 
       useMultiStoreStore.setState({ stores: updatedStores })
@@ -131,10 +128,10 @@ describe('多门店管理完整流程集成测试', () => {
       const currentStores = useMultiStoreStore.getState().stores
       expect(currentStores.length).toBe(2)
 
-      const allSynced = (currentStores as any[]).every(
-        (store) => store.syncStatus === 'synced'
+      const allActive = (currentStores as any[]).every(
+        (store: any) => store.status === 'active'
       )
-      expect(allSynced).toBe(true)
+      expect(allActive).toBe(true)
     })
   })
 })

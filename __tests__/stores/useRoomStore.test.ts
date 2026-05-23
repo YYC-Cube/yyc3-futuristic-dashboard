@@ -31,7 +31,7 @@ describe('useRoomStore', () => {
       useRoomStore.getState().selectRoom(mockRoom)
 
       expect(useRoomStore.getState().selectedRoom?.id).toBe('room-001')
-      expect(useRoomStore.getState().selectedRoom?.name).toBe('VIP包厢')
+      expect((useRoomStore.getState().selectedRoom as any)?.name).toBe('VIP包厢')
     })
 
     it('应该能够清除选中房间', () => {
@@ -269,7 +269,7 @@ describe('useRoomStore', () => {
       useRoomStore.getState().selectRoom(
         useRoomStore.getState().rooms[0]
       )
-      expect(useRoomStore.getState().selectedRoom?.name).toBe('小包A')
+      expect((useRoomStore.getState().selectedRoom as any)?.name).toBe('小包A')
 
       const available = useRoomStore.getState().getAvailableRooms()
       expect(available.length).toBe(1)

@@ -161,7 +161,7 @@ test.describe('订单管理 E2E 测试', () => {
         ).toBeVisible()
         expect(
           detailView.locator('[data-testid="detail-total-amount"]')
-        ).isVisible()
+        ).toBeVisible()
 
         const backButton = detailView.getByRole('button', { name: /返回|关闭/i })
         if (await backButton.isVisible()) {
