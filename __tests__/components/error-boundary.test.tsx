@@ -3,17 +3,18 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import React from 'react'
 import { ErrorBoundary } from '@/components/common/error-boundary'
 
+vi.mock('@sentry/react', () => ({
+  captureException: vi.fn().mockReturnValue('test-event-id'),
+  showReportDialog: vi.fn(),
+  ErrorBoundary: ({ children, fallback }: any) =>
+    fallback ? <div>{fallback}</div> : <div>{children}</div>,
+}))
+
 describe('ErrorBoundary', () => {
   let consoleSpy: ReturnType<typeof vi.spyOn>
 
   beforeEach(() => {
     consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
-    vi.mock('@sentry/react', () => ({
-      captureException: vi.fn().mockReturnValue('test-event-id'),
-      showReportDialog: vi.fn(),
-      ErrorBoundary: ({ children, fallback }: any) =>
-        fallback ? <div>{fallback}</div> : <div>{children}</div>,
-    }))
   })
 
   afterEach(() => {

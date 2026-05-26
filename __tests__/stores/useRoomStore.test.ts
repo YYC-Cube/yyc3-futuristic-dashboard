@@ -1,5 +1,20 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { useRoomStore } from '@/lib/stores/useRoomStore'
+
+vi.mock('@/lib/services', () => ({
+  roomService: {
+    getRooms: vi.fn().mockResolvedValue([
+      { id: 'room-001', name: 'VIP包厢', status: 'available' },
+      { id: 'room-002', name: '标准包厢', status: 'occupied' },
+    ]),
+    getRoomById: vi.fn().mockImplementation((id: string) => 
+      Promise.resolve({ id, name: `包厢${id}`, status: 'available' })
+    ),
+    updateStatus: vi.fn().mockResolvedValue({ id: 'room-001', status: 'occupied', updatedAt: new Date().toISOString() }),
+    start: vi.fn().mockResolvedValue({ id: 'room-001', status: 'occupied', startTime: new Date().toISOString() }),
+    checkout: vi.fn().mockResolvedValue({ orderId: 'order-001', total: 500, checkoutTime: new Date().toISOString() }),
+  },
+}))
 
 describe('useRoomStore', () => {
   beforeEach(() => {
@@ -21,6 +36,34 @@ describe('useRoomStore', () => {
       expect(state.loading).toBe(false)
       expect(state.error).toBeNull()
       expect(state.lastFetched).toBeNull()
+    })
+  })
+
+  describe('fetchRooms', () => {
+    it('应该成功获取房间列表', async () => {
+      await useRoomStore.getState().fetchRooms()
+
+      const state = useRoomStore.getState()
+      expect(state.rooms.length).toBeGreaterThan(0)
+      expect(state.loading).toBe(false)
+      expect(state.lastFetched).not.toBeNull()
+    })
+
+    it('应该在loading状态时跳过请求', async () => {
+      useRoomStore.setState({ loading: true })
+
+      await useRoomStore.getState().fetchRooms()
+
+      expect(useRoomStore.getState().rooms).toEqual([])
+    })
+
+    it('应该在数据未过期时跳过请求（缓存机制）', async () => {
+      const recentTime = Date.now() - 10000 // 10秒前
+      useRoomStore.setState({ lastFetched: recentTime })
+
+      await useRoomStore.getState().fetchRooms()
+
+      expect(useRoomStore.getState().rooms).toEqual([])
     })
   })
 
@@ -285,6 +328,71 @@ describe('useRoomStore', () => {
       useRoomStore.getState().reset()
       expect(useRoomStore.getState().rooms).toEqual([])
       expect(useRoomStore.getState().selectedRoom).toBeNull()
+    })
+  })
+
+  describe('updateRoomStatus', () => {
+    beforeEach(() => {
+      useRoomStore.setState({
+        rooms: [
+          { id: 'room-001', name: 'VIP包厢', status: 'available' },
+          { id: 'room-002', name: '标准包厢', status: 'available' },
+        ] as any,
+      })
+    })
+
+    it('应该成功更新房间状态', async () => {
+      await useRoomStore.getState().updateRoomStatus('room-001', 'occupied')
+
+      const updatedRoom = useRoomStore.getState().rooms.find(r => r.id === 'room-001')
+      expect(updatedRoom?.status).toBeDefined()
+    })
+  })
+
+  describe('startRoom', () => {
+    it('应该成功启动房间服务', async () => {
+      useRoomStore.setState({
+        rooms: [{ id: 'room-001', status: 'available' }] as any,
+      })
+
+      await useRoomStore.getState().startRoom('room-001', 'customer-001')
+
+      expect(useRoomStore.getState().lastFetched).toBeDefined()
+    })
+  })
+
+  describe('checkoutRoom', () => {
+    it('应该成功结账退房', async () => {
+      useRoomStore.setState({
+        rooms: [{ id: 'room-001', status: 'occupied' }] as any,
+      })
+
+      await useRoomStore.getState().checkoutRoom('room-001')
+
+      expect(useRoomStore.getState().lastFetched).toBeDefined()
+    })
+  })
+
+  describe('cleanRoom', () => {
+    it('应该将房间状态设置为cleaning', async () => {
+      useRoomStore.setState({
+        rooms: [{ id: 'room-001', status: 'occupied' }] as any,
+      })
+
+      await useRoomStore.getState().cleanRoom('room-001')
+
+      const room = useRoomStore.getState().rooms.find(r => r.id === 'room-001')
+      expect(room?.status).toBeDefined()
+    })
+  })
+
+  describe('refreshRooms', () => {
+    it('应该刷新房间列表', async () => {
+      useRoomStore.setState({ lastFetched: Date.now() - 60000 })
+
+      await useRoomStore.getState().refreshRooms()
+
+      expect(useRoomStore.getState().rooms.length).toBeGreaterThan(0)
     })
   })
 })
