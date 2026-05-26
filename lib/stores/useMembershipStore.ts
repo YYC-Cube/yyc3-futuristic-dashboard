@@ -210,7 +210,7 @@ export const useMembershipStore = create<MembershipStore>()(
             loading: false,
           }))
 
-          console.log(`✅ [Membership] Member created: ${newMember.name}`)
+          logger.info('Membership', `Member created: ${newMember.name}`)
           return newMember
         } catch (err) {
           logger.error('Membership', 'Create member failed', err)
@@ -233,7 +233,7 @@ export const useMembershipStore = create<MembershipStore>()(
               : state.selectedMember,
             loading: false,
           }))
-          console.log(`✅ [Membership] Member updated: ${memberId}`)
+          logger.info('Membership', `Member updated: ${memberId}`)
         } catch (err) {
           logger.error('Membership', 'Update member failed', err)
           set({ error: "更新会员信息失败", loading: false })
@@ -249,7 +249,7 @@ export const useMembershipStore = create<MembershipStore>()(
             selectedMember: state.selectedMember?.id === memberId ? null : state.selectedMember,
             loading: false,
           }))
-          console.log(`✅ [Membership] Member deleted: ${memberId}`)
+          logger.info('Membership', `Member deleted: ${memberId}`)
         } catch (err) {
           logger.error('Membership', 'Delete member failed', err)
           set({ error: "删除会员失败", loading: false })
@@ -265,7 +265,7 @@ export const useMembershipStore = create<MembershipStore>()(
         }
         
         get().updateMember(memberId, { tierId: newTierId })
-        console.log(`🎉 [Membership] Member ${memberId} upgraded to ${tier.name}`)
+        logger.info('Membership', `Member ${memberId} upgraded to ${tier.name}`)
       },
 
       addPoints: async (memberId, points, type, description, metadata?: Record<string, unknown>) => {
@@ -295,7 +295,7 @@ export const useMembershipStore = create<MembershipStore>()(
           transactions: [transaction, ...state.transactions],
         }))
 
-        console.log(`✅ [Membership] ${type === 'earn' ? '+' : '-'}${Math.abs(points)} points for member ${memberId}`)
+        logger.info('Membership', `${type === 'earn' ? '+' : '-'}${Math.abs(points)} points for member ${memberId}`)
       },
 
       redeemPoints: async (memberId: string, itemId: string): Promise<boolean> => {
@@ -313,7 +313,7 @@ export const useMembershipStore = create<MembershipStore>()(
         }
 
         await get().addPoints(memberId, -item.pointsCost, 'redeem', `兑换: ${item.name}`, { metadata: { itemId } })
-        console.log(`🎁 [Membership] Redeemed: ${item.name}`)
+        logger.info('Membership', `Redeemed: ${item.name}`)
         return true
       },
 

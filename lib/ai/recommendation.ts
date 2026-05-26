@@ -39,8 +39,6 @@ class RecommendationEngine {
   private itemEmbeddings: Map<string, number[]> = new Map()
 
   async initialize(): Promise<void> {
-    console.log("[RecommendationEngine] Initializing...")
-    
     const popularItems = [
       { id: "prod-001", name: "青岛啤酒", category: "beer" },
       { id: "prod-002", name: "果盘", category: "fruits" },
@@ -57,8 +55,6 @@ class RecommendationEngine {
         console.error(`[RecommendationEngine] Failed to embed ${item.id}:`, error)
       }
     }
-
-    console.log(`[RecommendationEngine] Initialized with ${this.itemEmbeddings.size} items`)
   }
 
   updateUserProfile(userId: string, profile: Partial<UserProfile>): void {

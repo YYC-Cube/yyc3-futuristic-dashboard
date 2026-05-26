@@ -176,4 +176,66 @@ describe("useOrderStore", () => {
       expect(useOrderStore.getState().lastFetched).toBe(now)
     })
   })
+
+  describe("addOrderItem - 添加订单项", () => {
+    it("应该成功添加订单项", async () => {
+      useOrderStore.setState({
+        orders: [{ id: "order-001", items: [] }] as any,
+      })
+
+      await useOrderStore.getState().addOrderItem("order-001", {
+        productId: "prod-001",
+        productName: "青岛啤酒",
+        quantity: 5,
+        unitPrice: 12,
+        totalPrice: 60,
+        status: "pending" as const,
+      })
+
+      const order = useOrderStore.getState().orders.find(o => o.id === "order-001")
+      expect(order?.items).toHaveLength(1)
+    })
+  })
+
+  describe("removeOrderItem - 删除订单项", () => {
+    it("应该成功删除订单项", async () => {
+      useOrderStore.setState({
+        orders: [{
+          id: "order-001",
+          items: [{ id: "item-001", productId: "prod-001" }] as any,
+        }] as any,
+      })
+
+      await useOrderStore.getState().removeOrderItem("order-001", "item-001")
+
+      const order = useOrderStore.getState().orders.find(o => o.id === "order-001")
+      expect(order?.items).toHaveLength(0)
+    })
+  })
+
+  describe("边界条件测试", () => {
+    it("应该处理空订单列表的查询", () => {
+      useOrderStore.setState({ orders: [] })
+
+      expect(useOrderStore.getState().getOrdersByRoom("room-101")).toEqual([])
+      expect(useOrderStore.getState().getPendingOrders()).toEqual([])
+      expect(useOrderStore.getState().getTodayOrders()).toEqual([])
+      expect(useOrderStore.getState().getOrderCount()).toBe(0)
+    })
+
+    it("应该处理多次clearError调用", () => {
+      useOrderStore.setState({ error: "Error 1" })
+      useOrderStore.getState().clearError()
+      useOrderStore.getState().clearError()
+
+      expect(useOrderStore.getState().error).toBeNull()
+    })
+
+    it("应该处理setCurrentOrder为null", () => {
+      useOrderStore.setState({ currentOrder: { id: "1" } as any })
+      useOrderStore.getState().setCurrentOrder(null)
+
+      expect(useOrderStore.getState().currentOrder).toBeNull()
+    })
+  })
 })

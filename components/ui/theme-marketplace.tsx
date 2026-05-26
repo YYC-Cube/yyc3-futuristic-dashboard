@@ -73,7 +73,6 @@ export function ThemeMarketplace({ className }: ThemeMarketplaceProps) {
 
   const applyCommunityTheme = (theme: CommunityTheme) => {
     alert(`✨ 已应用主题：${theme.name}\n\n在实际应用中，这将更新全局CSS变量并持久化保存。`)
-    console.log('Applying community theme:', theme)
     setSelectedTheme(null)
   }
 
@@ -311,8 +310,10 @@ export function ThemeMarketplace({ className }: ThemeMarketplaceProps) {
 
       {/* AI Recommendation Tab */}
       {activeTab === 'ai' && (
-        <AIRecommendationEngine 
-          onRecommendationSelect={(rec) => console.log('Selected AI recommendation:', rec)}
+        <AIRecommendationEngine
+          onRecommendationSelect={(rec) => {
+            // AI recommendation selected
+          }}
         />
       )}
 

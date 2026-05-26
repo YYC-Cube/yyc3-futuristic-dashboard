@@ -228,7 +228,7 @@ export const useInventoryStore = create<InventoryStore>()(
               loading: false,
             }))
 
-            console.log(`✅ [Inventory] Item created: ${newItem.name}`)
+            logger.info('Inventory', `Item created: ${newItem.name}`)
             
             // Check if this item triggers any alerts
             await get().checkStockLevels()
@@ -252,7 +252,7 @@ export const useInventoryStore = create<InventoryStore>()(
               ),
               loading: false,
             }))
-            console.log(`✅ [Inventory] Item updated: ${itemId}`)
+            logger.info('Inventory', `Item updated: ${itemId}`)
             
             // Re-check stock levels after update
             await get().checkStockLevels()
@@ -271,7 +271,7 @@ export const useInventoryStore = create<InventoryStore>()(
               selectedItemId: state.selectedItemId === itemId ? null : state.selectedItemId,
               loading: false,
             }))
-            console.log(`✅ [Inventory] Item deleted: ${itemId}`)
+            logger.info('Inventory', `Item deleted: ${itemId}`)
           } catch (err) {
             logger.error('Inventory', 'Delete item failed', err)
             set({ error: "删除库存失败", loading: false })
@@ -325,7 +325,7 @@ export const useInventoryStore = create<InventoryStore>()(
             movements: [movement, ...state.movements].slice(0, 1000), // Keep last 1000 movements
           }))
 
-          console.log(`📊 [Inventory] Movement recorded: ${type} ${quantity} units of ${item.name}`)
+          logger.info('Inventory', `Movement recorded: ${type} ${quantity} units of ${item.name}`)
 
           // Check stock levels after movement
           await get().checkStockLevels()
@@ -473,7 +473,7 @@ export const useInventoryStore = create<InventoryStore>()(
             }
 
             set(state => ({ forecasts }))
-            console.log(`📈 [Inventory] Forecast generated for ${item.name}: ${days} days`)
+            logger.info('Inventory', `Forecast generated for ${item.name}: ${days} days`)
 
             return forecasts
           } catch (err) {
@@ -495,7 +495,7 @@ export const useInventoryStore = create<InventoryStore>()(
                 : alert
             ),
           }))
-          console.log(`✅ [Inventory] Alert ${alertId} acknowledged by ${userId}`)
+          logger.info('Inventory', `Alert ${alertId} acknowledged by ${userId}`)
         },
 
         getItemById: (id: string) => {
@@ -547,7 +547,7 @@ export const useInventoryStore = create<InventoryStore>()(
           set(state => ({
             alertSettings: { ...state.alertSettings, ...settings },
           }))
-          console.log('⚙️ [Inventory] Alert settings updated')
+          logger.info('Inventory', 'Alert settings updated')
         },
 
         clearError: () => set({ error: null }),

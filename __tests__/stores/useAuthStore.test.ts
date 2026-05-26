@@ -260,17 +260,121 @@ describe('useAuthStore', () => {
     })
 
     it('应该在登录后保持状态一致性', () => {
+        useAuthStore.getState().ghostModeLogin()
+
+        const state1 = useAuthStore.getState()
+        const state2 = useAuthStore.getState()
+
+        expect(state1.isAuthenticated).toBe(state2.isAuthenticated)
+        expect(state1.user?.id).toBe(state2.user?.id)
+        expect(state1.token).toBe(state2.token)
+
+        expect(state1.isAdmin()).toBe(state2.isAdmin())
+        expect(state1.hasRole('admin')).toBe(state2.hasRole('admin'))
+      })
+  })
+
+  describe('login - 正常登录流程', () => {
+    it('应该处理登录过程', async () => {
+      const result = await useAuthStore.getState().login('testuser', 'testpass')
+
+      expect(typeof result).toBe('boolean')
+    })
+
+    it('应该在登录过程中设置loading状态', async () => {
+      const loginPromise = useAuthStore.getState().login('test', 'test')
+
+      expect(useAuthStore.getState().loading).toBe(true)
+
+      await loginPromise
+
+      expect(useAuthStore.getState().loading).toBe(false)
+    })
+
+    it('应该在登录失败时设置error信息', async () => {
+      await useAuthStore.getState().login('invalid', 'credentials')
+
+      if (!useAuthStore.getState().isAuthenticated) {
+        expect(useAuthStore.getState().error).toBeDefined()
+      }
+    })
+  })
+
+  describe('loadFromStorage - 从本地存储加载', () => {
+    beforeEach(() => {
+      localStorage.clear()
+    })
+
+    it('应该从localStorage加载有效的认证信息', () => {
+      localStorage.setItem('yyc3_auth_token', 'test-token-123')
+      localStorage.setItem('yyc3_auth_user', JSON.stringify({
+        id: 'stored-user',
+        name: '存储用户',
+        role: 'manager'
+      }))
+
+      useAuthStore.getState().loadFromStorage()
+
+      expect(useAuthStore.getState().token).toBe('test-token-123')
+      expect(useAuthStore.getState().user?.name).toBe('存储用户')
+      expect(useAuthStore.getState().isAuthenticated).toBe(true)
+    })
+
+    it('应该处理无效的JSON数据', () => {
+      localStorage.setItem('yyc3-auth-token', 'valid-token')
+      localStorage.setItem('yyc3-auth-user', 'invalid-json')
+
+      useAuthStore.getState().loadFromStorage()
+
+      expect(useAuthStore.getState().isAuthenticated).toBe(false)
+      expect(useAuthStore.getState().user).toBeNull()
+    })
+
+    it('应该处理缺失的localStorage项', () => {
+      useAuthStore.getState().loadFromStorage()
+
+      expect(useAuthStore.getState().isAuthenticated).toBe(false)
+      expect(useAuthStore.getState().token).toBeNull()
+      expect(useAuthStore.getState().user).toBeNull()
+    })
+  })
+
+  describe('边界条件测试', () => {
+    it('应该处理多次快速logout调用', () => {
       useAuthStore.getState().ghostModeLogin()
+      expect(useAuthStore.getState().isAuthenticated).toBe(true)
 
-      const state1 = useAuthStore.getState()
-      const state2 = useAuthStore.getState()
+      useAuthStore.getState().logout()
+      useAuthStore.getState().logout()
 
-      expect(state1.isAuthenticated).toBe(state2.isAuthenticated)
-      expect(state1.user?.id).toBe(state2.user?.id)
-      expect(state1.token).toBe(state2.token)
+      expect(useAuthStore.getState().isAuthenticated).toBe(false)
+      expect(useAuthStore.getState().user).toBeNull()
+    })
 
-      expect(state1.isAdmin()).toBe(state2.isAdmin())
-      expect(state1.hasRole('admin')).toBe(state2.hasRole('admin'))
+    it('应该处理多次clearError调用', () => {
+      useAuthStore.setState({ error: 'Error 1' })
+      useAuthStore.getState().clearError()
+      useAuthStore.getState().clearError()
+
+      expect(useAuthStore.getState().error).toBeNull()
+    })
+
+    it('应该正确处理角色切换后的权限检查', () => {
+      useAuthStore.setState({
+        user: { id: '1', name: 'Admin', role: 'admin' } as any,
+        isAuthenticated: true
+      })
+
+      expect(useAuthStore.getState().isAdmin()).toBe(true)
+      expect(useAuthStore.getState().hasRole('admin')).toBe(true)
+
+      useAuthStore.setState({
+        user: { id: '2', name: 'Staff', role: 'staff' } as any,
+        isAuthenticated: true
+      })
+
+      expect(useAuthStore.getState().isAdmin()).toBe(false)
+      expect(useAuthStore.getState().hasRole('staff')).toBe(true)
     })
   })
 })

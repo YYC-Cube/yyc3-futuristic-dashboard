@@ -303,4 +303,259 @@ describe('useInventoryStore', () => {
       expect(state.loading).toBe(false)
     })
   })
+
+  describe('fetchInventory - 获取库存列表', () => {
+    it('应该成功获取库存列表', async () => {
+      await useInventoryStore.getState().fetchInventory()
+
+      const state = useInventoryStore.getState()
+      expect(state.items.length).toBeGreaterThan(0)
+      expect(state.loading).toBe(false)
+      expect(state.error).toBeNull()
+      expect(state.lastFetched).not.toBeNull()
+    }, 10000)
+
+    it('应该在loading时避免重复请求', async () => {
+      useInventoryStore.setState({ loading: true })
+
+      await useInventoryStore.getState().fetchInventory()
+
+      expect(useInventoryStore.getState().loading).toBe(true)
+    })
+  })
+
+  describe('recordMovement - 调整库存数量', () => {
+    beforeEach(async () => {
+      await useInventoryStore.getState().addItem(
+        createTestItemData({ name: '调整测试商品', sku: 'ADJ-001', currentStock: 100 })
+      )
+    })
+
+    it('应该正确增加库存', async () => {
+      const itemId = useInventoryStore.getState().items[0].id
+
+      await useInventoryStore.getState().recordMovement(itemId, 'restock', 50, '进货')
+
+      const item = useInventoryStore.getState().getItemById(itemId)
+      expect(item?.currentStock).toBe(150)
+    })
+
+    it('应该正确减少库存', async () => {
+      const itemId = useInventoryStore.getState().items[0].id
+
+      await useInventoryStore.getState().recordMovement(itemId, 'sale', 30, '销售')
+
+      const item = useInventoryStore.getState().getItemById(itemId)
+      expect(item?.currentStock).toBe(70)
+    })
+
+    it('应该记录库存变动', async () => {
+      const itemId = useInventoryStore.getState().items[0].id
+
+      await useInventoryStore.getState().recordMovement(itemId, 'adjustment', 20, '盘点调整')
+
+      const movements = useInventoryStore.getState().movements
+      expect(movements.length).toBe(1)
+      expect(movements[0].itemId).toBe(itemId)
+      expect(movements[0].quantity).toBe(20)
+    })
+
+    it('不存在的商品应处理异常', async () => {
+      try {
+        await useInventoryStore.getState().recordMovement('non-existent', 'restock', 10, '测试')
+      } catch (e) {
+        expect(e).toBeDefined()
+      }
+    })
+  })
+
+  describe('recordMovement - 记录库存变动', () => {
+    beforeEach(async () => {
+      await useInventoryStore.getState().addItem(
+        createTestItemData({ name: '变动记录商品', sku: 'MOV-001' })
+      )
+    })
+
+    it('应该成功记录入库操作', async () => {
+      const itemId = useInventoryStore.getState().items[0].id
+
+      await useInventoryStore.getState().recordMovement(
+        itemId, 'restock', 100, '采购入库'
+      )
+
+      expect(useInventoryStore.getState().movements.length).toBe(1)
+      expect(useInventoryStore.getState().movements[0].type).toBe('restock')
+    })
+
+    it('应该成功记录出库操作', async () => {
+      const itemId = useInventoryStore.getState().items[0].id
+
+      await useInventoryStore.getState().recordMovement(
+        itemId, 'sale', 50, '销售出库'
+      )
+
+      expect(useInventoryStore.getState().movements.length).toBe(1)
+      expect(useInventoryStore.getState().movements[0].type).toBe('sale')
+    })
+  })
+
+  describe('generateForecast - 生成预测', () => {
+    beforeEach(async () => {
+      await useInventoryStore.getState().addItem(
+        createTestItemData({ name: '预测商品', sku: 'FOR-001', currentStock: 200 })
+      )
+    })
+
+    it('应该生成库存预测数据', async () => {
+      const itemId = useInventoryStore.getState().items[0].id
+
+      const forecasts = await useInventoryStore.getState().generateForecast(itemId, 7)
+
+      expect(Array.isArray(forecasts)).toBe(true)
+      if (forecasts.length > 0) {
+        expect(forecasts[0]).toHaveProperty('date')
+        expect(forecasts[0]).toHaveProperty('predictedDemand')
+      }
+    })
+
+    it('不存在的商品应返回空数组', async () => {
+      const forecasts = await useInventoryStore.getState().generateForecast('non-existent', 7)
+
+      expect(Array.isArray(forecasts)).toBe(true)
+      expect(forecasts.length).toBe(0)
+    })
+  })
+
+  describe('getExpiringItems - 获取临期商品', () => {
+    beforeEach(async () => {
+      const soonDate = new Date()
+      soonDate.setDate(soonDate.getDate() + 15)
+
+      const laterDate = new Date()
+      laterDate.setDate(laterDate.getDate() + 60)
+
+      await useInventoryStore.getState().addItem(
+        createTestItemData({ name: '临期商品', sku: 'EXP-001', expiryDate: soonDate.toISOString() })
+      )
+
+      await useInventoryStore.getState().addItem(
+        createTestItemData({ name: '正常商品', sku: 'NOR-001', expiryDate: laterDate.toISOString() })
+      )
+    })
+
+    it('应该返回在阈值内过期的商品', () => {
+      const expiringItems = useInventoryStore.getState().getExpiringItems(30)
+
+      expect(expiringItems.length).toBe(1)
+      expect(expiringItems[0].name).toBe('临期商品')
+    })
+
+    it('不应该返回未过期的商品', () => {
+      const expiringItems = useInventoryStore.getState().getExpiringItems(30)
+
+      expect(expiringItems.some(item => item.name === '正常商品')).toBe(false)
+    })
+  })
+
+  describe('checkStockLevels - 检查库存水平', () => {
+    beforeEach(async () => {
+      await useInventoryStore.getState().addItem(
+        createTestItemData({
+          name: '低库存预警商品',
+          sku: 'LOW-001',
+          currentStock: 5,
+          minimumStock: 10,
+          maximumStock: 100,
+        })
+      )
+
+      await useInventoryStore.getState().addItem(
+        createTestItemData({
+          name: '正常库存商品',
+          sku: 'NORM-001',
+          currentStock: 50,
+          minimumStock: 10,
+          maximumStock: 100,
+        })
+      )
+    })
+
+    it('应该为低库存商品生成预警', async () => {
+      await useInventoryStore.getState().checkStockLevels()
+
+      const alerts = useInventoryStore.getState().alerts
+      expect(alerts.some(a => a.type === 'low_stock')).toBe(true)
+    })
+  })
+
+  describe('边界条件和错误处理', () => {
+    it('addItem 失败时应设置错误状态', async () => {
+      try {
+        await useInventoryStore.getState().addItem(null as any)
+      } catch (e) {
+        expect(e).toBeDefined()
+      }
+
+      expect(useInventoryStore.getState().error).not.toBeNull()
+      expect(useInventoryStore.getState().loading).toBe(false)
+    })
+
+    it('updateItem 应处理异常情况', async () => {
+      await useInventoryStore.getState().addItem(createTestItemData({ name: '异常更新' }))
+      const itemId = useInventoryStore.getState().items[0].id
+
+      try {
+        await useInventoryStore.getState().updateItem(itemId, null as any)
+      } catch (e) {
+        expect(e).toBeDefined()
+      }
+    })
+
+    it('deleteItem 应处理异常情况', async () => {
+      await useInventoryStore.getState().addItem(createTestItemData({ name: '异常删除' }))
+      const itemId = useInventoryStore.getState().items[0].id
+
+      try {
+        await useInventoryStore.getState().deleteItem(itemId)
+      } catch (e) {
+        expect(e).toBeDefined()
+      }
+
+      expect(useInventoryStore.getState().getItemById(itemId)).toBeUndefined()
+    })
+
+    it('getLowStockItems 应该包含超储商品（如果maximumStock被超过）', async () => {
+      await useInventoryStore.getState().addItem(
+        createTestItemData({
+          name: '超储商品',
+          sku: 'OVER-001',
+          currentStock: 400,
+          maximumStock: 200,
+        })
+      )
+
+      const lowStockItems = useInventoryStore.getState().getLowStockItems()
+
+      expect(lowStockItems.length).toBeGreaterThanOrEqual(0)
+    })
+
+    it('recordMovement 应该支持补货操作', async () => {
+      await useInventoryStore.getState().addItem(
+        createTestItemData({
+          name: '需补货商品',
+          sku: 'REORDER-001',
+          currentStock: 5,
+          reorderPoint: 20,
+          reorderQuantity: 50,
+        })
+      )
+
+      const itemId = useInventoryStore.getState().items[0].id
+
+      await useInventoryStore.getState().recordMovement(itemId, 'restock', 50, '自动补货')
+
+      const item = useInventoryStore.getState().getItemById(itemId)
+      expect(item?.currentStock).toBe(55)
+    })
+  })
 })

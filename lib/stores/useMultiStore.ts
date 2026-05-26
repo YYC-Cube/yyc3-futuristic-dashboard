@@ -161,7 +161,7 @@ export const useMultiStoreStore = create<MultiStoreStore>()(
         try {
           localStorage.setItem('active-store-id', storeId)
           set({ activeStoreId: storeId })
-          console.log(`✅ [MultiStore] Active store changed to: ${store.name}`)
+          logger.info('MultiStore', `Active store changed to: ${store.name}`)
         } catch (storageError) {
           console.warn('⚠️ [MultiStore] localStorage write failed:', storageError)
           set({ activeStoreId: storeId })
@@ -194,7 +194,7 @@ export const useMultiStoreStore = create<MultiStoreStore>()(
             loading: false,
           }))
 
-          console.log(`✅ [MultiStore] Store created: ${newStore.name}`)
+          logger.info('MultiStore', `Store created: ${newStore.name}`)
           return newStore
         } catch (err) {
           logger.error('MultiStore', 'Create store failed', err)
@@ -214,7 +214,7 @@ export const useMultiStoreStore = create<MultiStoreStore>()(
             ),
             loading: false,
           }))
-          console.log(`✅ [MultiStore] Store updated: ${storeId}`)
+          logger.info('MultiStore', `Store updated: ${storeId}`)
         } catch (err) {
           logger.error('MultiStore', 'Update store failed', err)
           set({ error: "更新门店失败", loading: false })
@@ -230,7 +230,7 @@ export const useMultiStoreStore = create<MultiStoreStore>()(
             activeStoreId: state.activeStoreId === storeId ? null : state.activeStoreId,
             loading: false,
           }))
-          console.log(`✅ [MultiStore] Store deleted: ${storeId}`)
+          logger.info('MultiStore', `Store deleted: ${storeId}`)
         } catch (err) {
           logger.error('MultiStore', 'Delete store failed', err)
           set({ error: "删除门店失败", loading: false })
@@ -246,7 +246,7 @@ export const useMultiStoreStore = create<MultiStoreStore>()(
           store.status === 'active' ? 'inactive' : 'active'
 
         await get().updateStore(storeId, { status: newStatus })
-        console.log(`🔄 [MultiStore] Store ${storeId} status toggled to: ${newStatus}`)
+        logger.info('MultiStore', `Store ${storeId} status toggled to: ${newStatus}`)
       },
 
       refreshStoreStats: async (storeId: string) => {
@@ -274,7 +274,7 @@ export const useMultiStoreStore = create<MultiStoreStore>()(
             ),
           }))
 
-          console.log(`📊 [MultiStore] Stats refreshed for store: ${storeId}`)
+          logger.info('MultiStore', `Stats refreshed for store: ${storeId}`)
         } catch (err) {
           logger.error('MultiStore', 'Refresh stats failed', err)
         }

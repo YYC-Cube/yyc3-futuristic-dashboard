@@ -1,7 +1,7 @@
-import { createHash } from "crypto"
 import NextAuth from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import { z } from "zod"
+import logger from "../logger"
 
 const loginSchema = z.object({
   username: z.string().min(1, "用户名不能为空"),
@@ -21,7 +21,13 @@ type TestAccount = {
 }
 
 function simpleHash(input: string): string {
-  return createHash("sha256").update(input).digest("hex").slice(0, 16)
+  let hash = 0
+  for (let i = 0; i < input.length; i++) {
+    const char = input.charCodeAt(i)
+    hash = ((hash << 5) - hash) + char
+    hash |= 0
+  }
+  return Math.abs(hash).toString(16).padStart(16, '0').slice(0, 16)
 }
 
 const TEST_ACCOUNTS: Record<string, TestAccount> = {
@@ -150,12 +156,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   events: {
     async signIn({ user, account }) {
-      console.log(`[Auth] User signed in: ${user.name} (${account?.provider})`)
+      logger.debug('Auth', `User signed in: ${user.name} (${account?.provider})`)
     },
     async signOut(message: any) {
       const token = message.token
       if (token) {
-        console.log(`[Auth] User signed out: ${token.name}`)
+        logger.debug('Auth', `User signed out: ${token.name}`)
       }
     },
   },

@@ -5,7 +5,7 @@ import { checkAuthAndPermissions } from "@/lib/auth/rbac"
 
 const rateLimiter = createRateLimiter()
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const pathname = new URL(request.url).pathname
 
   if (

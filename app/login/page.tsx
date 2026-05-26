@@ -36,10 +36,6 @@ export default function LoginPage() {
                     window.location.port === '20307'
       
       setIsDevMode(isDev)
-      
-      if (isDev) {
-        console.log('👻 Development mode detected - Ghost Mode available')
-      }
     }
     
     checkDevEnvironment()
@@ -52,7 +48,6 @@ export default function LoginPage() {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'g') {
         e.preventDefault()
-        console.log('⌨️ Keyboard shortcut triggered: Ghost Mode Login')
         handleGhostModeLogin()
       }
     }
@@ -75,10 +70,6 @@ export default function LoginPage() {
 
   const handleGhostModeLogin = () => {
     ghostModeLogin()
-    console.log('🚀 Redirecting to dashboard...')
-    setTimeout(() => {
-      router.replace("/")
-    }, 100)
   }
 
   return (
