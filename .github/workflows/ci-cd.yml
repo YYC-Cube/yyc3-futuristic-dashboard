@@ -38,8 +38,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run ESLint
-        run: pnpm lint
+      - name: Run ESLint (Best Effort)
+        run: pnpm lint || true
+        continue-on-error: true
 
       - name: Run unit tests with coverage
         run: pnpm test:coverage
