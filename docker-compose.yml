@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  yyc3-dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: yyc3-dashboard
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_ENVIRONMENT=docker
+      - NEXT_PUBLIC_API_URL=http://localhost:4000
+    restart: unless-stopped
+    networks:
+      - yyc3-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Redis缓存服务（可选）
+  redis:
+    image: redis:7-alpine
+    container_name: yyc3-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    networks:
+      - yyc3-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  yyc3-network:
+    driver: bridge
+
+volumes:
+  redis-data:
+    driver: local
