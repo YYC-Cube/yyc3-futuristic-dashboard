@@ -365,7 +365,7 @@ describe('Dialog组件系统', () => {
             <DialogHeader>
               <DialogTitle>⚠️ 确认删除</DialogTitle>
               <DialogDescription>
-                您确定要删除"房间101"吗？此操作不可逆。
+                您确定要删除&ldquo;房间101&rdquo;吗？此操作不可逆。
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
@@ -386,7 +386,7 @@ describe('Dialog组件系统', () => {
 
       const confirmButton = await screen.findByTestId('confirm-delete')
       expect(confirmButton).toBeInTheDocument()
-      expect(screen.getByText(/您确定要删除"房间101"吗？/i)).toBeInTheDocument()
+      expect(screen.getByText(/您确定要删除.*房间101.*吗？/i)).toBeInTheDocument()
 
       fireEvent.click(confirmButton)
       expect(handleDelete).toHaveBeenCalledTimes(1)

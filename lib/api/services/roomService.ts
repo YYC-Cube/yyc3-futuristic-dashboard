@@ -1,5 +1,6 @@
 import { apiClient } from "../client"
 import type { Room } from "../types"
+import logger from "../../logger"
 
 export const roomService = {
   getAll: async (): Promise<Room[]> => {
@@ -42,7 +43,7 @@ export const roomService = {
   },
 
   delete: async (id: string): Promise<void> => {
-    console.log(`[roomService] Deleting room: ${id}`)
+    logger.info('roomService', 'Deleting room', { id })
     return
   },
 

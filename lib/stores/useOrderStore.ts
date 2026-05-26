@@ -2,6 +2,7 @@ import { create } from "zustand"
 import { devtools } from "zustand/middleware"
 import { orderService } from "../services"
 import type { Order, OrderItem } from "../api/types"
+import logger from "../logger"
 
 interface OrderStore {
   orders: Order[]
@@ -56,7 +57,7 @@ export const useOrderStore = create<OrderStore>()(
               lastFetched: now 
             })
         } catch (err) {
-          console.error('Fetch orders failed:', err)
+          logger.error('OrderStore', 'Fetch orders failed', err)
           set({ 
             error: "获取订单失败", 
             loading: false,
@@ -79,7 +80,7 @@ export const useOrderStore = create<OrderStore>()(
           }
           return null
         } catch (err) {
-          console.error('Create order failed:', err)
+          logger.error('OrderStore', 'Create order failed', err)
           set({ error: "创建订单失败" })
           return null
         }
@@ -95,7 +96,7 @@ export const useOrderStore = create<OrderStore>()(
           )
           set({ orders: updatedOrders, lastFetched: null })
         } catch (err) {
-          console.error('Update order failed:', err)
+          logger.error('OrderStore', 'Update order failed', err)
           set({ error: "更新订单失败" })
         }
       },
@@ -113,7 +114,7 @@ export const useOrderStore = create<OrderStore>()(
           })
           set({ orders: updatedOrders })
         } catch (err) {
-          console.error('Add order item failed:', err)
+          logger.error('OrderStore', 'Add order item failed', err)
           set({ error: "添加商品失败" })
         }
       },

@@ -346,7 +346,6 @@ export default function AnalyticsDashboard() {
                         outerRadius={80}
                         fill="#8884d8"
                         dataKey="value"
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         label={({ name, percent }: any) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}
                       >
                         {categoryData.map((entry, index) => (

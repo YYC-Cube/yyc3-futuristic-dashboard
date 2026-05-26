@@ -21,9 +21,6 @@ Sentry.init({
   ],
 
   beforeSend(event) {
-    if (event.exception) {
-      console.error("[Sentry]", event.exception);
-    }
     return event;
   },
 });

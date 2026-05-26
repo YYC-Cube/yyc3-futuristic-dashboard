@@ -75,7 +75,7 @@ describe('roomService', () => {
 
       expect(result).toBeDefined()
       if (result) {
-        expect(result.id || result.status || result.startTime).toBeDefined()
+        expect(result.id || result.status || result.createdAt).toBeDefined()
       }
     })
 

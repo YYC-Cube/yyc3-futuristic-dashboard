@@ -65,7 +65,7 @@ export async function withCache<T>(
         useClones: false,
       })
 
-      let cached = cache.get<T>(key)
+      const cached = cache.get<T>(key)
 
       if (cached !== undefined) {
         return cached
