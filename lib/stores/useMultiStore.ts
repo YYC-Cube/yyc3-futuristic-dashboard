@@ -2,6 +2,7 @@
 
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
+import logger from '../logger'
 
 export interface StoreLocation {
   address: string
@@ -134,14 +135,14 @@ export const useMultiStoreStore = create<MultiStoreStore>()(
           
           // Mock data for development
           await new Promise(resolve => setTimeout(resolve, 500))
-          console.log('📦 [MultiStore] Stores fetched successfully')
+          logger.info('MultiStore', 'Stores fetched successfully')
           set({ 
             stores: getMockStores(), 
             loading: false, 
             lastFetched: now 
           })
         } catch (err) {
-          console.error('❌ [MultiStore] Fetch stores failed:', err)
+          logger.error('MultiStore', 'Fetch stores failed', err)
           set({ 
             error: "获取门店列表失败", 
             loading: false,
@@ -196,7 +197,7 @@ export const useMultiStoreStore = create<MultiStoreStore>()(
           console.log(`✅ [MultiStore] Store created: ${newStore.name}`)
           return newStore
         } catch (err) {
-          console.error('❌ [MultiStore] Create store failed:', err)
+          logger.error('MultiStore', 'Create store failed', err)
           set({ error: "创建门店失败", loading: false })
           throw err
         }
@@ -215,7 +216,7 @@ export const useMultiStoreStore = create<MultiStoreStore>()(
           }))
           console.log(`✅ [MultiStore] Store updated: ${storeId}`)
         } catch (err) {
-          console.error('❌ [MultiStore] Update store failed:', err)
+          logger.error('MultiStore', 'Update store failed', err)
           set({ error: "更新门店失败", loading: false })
           throw err
         }
@@ -231,7 +232,7 @@ export const useMultiStoreStore = create<MultiStoreStore>()(
           }))
           console.log(`✅ [MultiStore] Store deleted: ${storeId}`)
         } catch (err) {
-          console.error('❌ [MultiStore] Delete store failed:', err)
+          logger.error('MultiStore', 'Delete store failed', err)
           set({ error: "删除门店失败", loading: false })
           throw err
         }
@@ -275,7 +276,7 @@ export const useMultiStoreStore = create<MultiStoreStore>()(
 
           console.log(`📊 [MultiStore] Stats refreshed for store: ${storeId}`)
         } catch (err) {
-          console.error('❌ [MultiStore] Refresh stats failed:', err)
+          logger.error('MultiStore', 'Refresh stats failed', err)
         }
       },
 
@@ -289,7 +290,7 @@ export const useMultiStoreStore = create<MultiStoreStore>()(
           const { stores, activeStoreId } = get()
           return stores.find(store => store.id === activeStoreId) ?? null
         } catch (err) {
-          console.error('❌ [MultiStore] getActiveStoreSafe failed:', err)
+          logger.error('MultiStore', 'getActiveStoreSafe failed', err)
           return null
         }
       },

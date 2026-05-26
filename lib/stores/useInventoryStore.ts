@@ -2,6 +2,7 @@
 
 import { create } from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
+import logger from '../logger'
 
 export interface InventoryItem {
   id: string
@@ -175,7 +176,7 @@ export const useInventoryStore = create<InventoryStore>()(
             // const response = await inventoryService.getItems(storeId)
             
             await new Promise(resolve => setTimeout(resolve, 400))
-            console.log('📦 [Inventory] Items fetched successfully')
+            logger.info('Inventory', 'Items fetched successfully')
             
             const mockItems = getMockInventoryItems(storeId)
             set({ 
@@ -187,7 +188,7 @@ export const useInventoryStore = create<InventoryStore>()(
             // Auto-check stock levels after fetching
             await get().checkStockLevels()
           } catch (err) {
-            console.error('❌ [Inventory] Fetch failed:', err)
+            logger.error('Inventory', 'Fetch failed', err)
             set({ 
               error: "获取库存数据失败", 
               loading: false,
@@ -201,10 +202,10 @@ export const useInventoryStore = create<InventoryStore>()(
           try {
             // TODO: Replace with actual API call
             await new Promise(resolve => setTimeout(resolve, 300))
-            console.log('🔔 [Inventory] Alerts fetched successfully')
+            logger.info('Inventory', 'Alerts fetched successfully')
             set({ loading: false })
           } catch (err) {
-            console.error('❌ [Inventory] Fetch alerts failed:', err)
+            logger.error('Inventory', 'Fetch alerts failed', err)
             set({ error: "获取预警信息失败", loading: false })
           }
         },
@@ -234,7 +235,7 @@ export const useInventoryStore = create<InventoryStore>()(
             
             return newItem
           } catch (err) {
-            console.error('❌ [Inventory] Create item failed:', err)
+            logger.error('Inventory', 'Create item failed', err)
             set({ error: "添加库存失败", loading: false })
             throw err
           }
@@ -256,7 +257,7 @@ export const useInventoryStore = create<InventoryStore>()(
             // Re-check stock levels after update
             await get().checkStockLevels()
           } catch (err) {
-            console.error('❌ [Inventory] Update item failed:', err)
+            logger.error('Inventory', 'Update item failed', err)
             set({ error: "更新库存失败", loading: false })
             throw err
           }
@@ -272,7 +273,7 @@ export const useInventoryStore = create<InventoryStore>()(
             }))
             console.log(`✅ [Inventory] Item deleted: ${itemId}`)
           } catch (err) {
-            console.error('❌ [Inventory] Delete item failed:', err)
+            logger.error('Inventory', 'Delete item failed', err)
             set({ error: "删除库存失败", loading: false })
             throw err
           }
@@ -476,7 +477,7 @@ export const useInventoryStore = create<InventoryStore>()(
 
             return forecasts
           } catch (err) {
-            console.error('❌ [Inventory] Forecast generation failed:', err)
+            logger.error('Inventory', 'Forecast generation failed', err)
             return []
           }
         },

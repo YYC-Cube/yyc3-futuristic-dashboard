@@ -1,5 +1,6 @@
 import { create } from "zustand"
 import { devtools } from "zustand/middleware"
+import logger from "../logger"
 
 export interface User {
   id: string
@@ -55,7 +56,7 @@ export const useAuthStore = create<AuthStore>()(
               localStorage.setItem(TOKEN_KEY, token)
               localStorage.setItem(USER_KEY, JSON.stringify(user))
             } catch (storageError) {
-              console.warn("⚠️ [AuthStore] localStorage write failed:", storageError)
+              logger.warn('AuthStore', 'localStorage write failed', { error: storageError })
             }
             set({ user, token, isAuthenticated: true, loading: false })
             return true
@@ -63,7 +64,7 @@ export const useAuthStore = create<AuthStore>()(
           set({ error: response.message || "登录失败", loading: false })
           return false
         } catch (err) {
-          console.error("❌ [AuthStore] Login failed:", err)
+          logger.error('AuthStore', 'Login failed', err)
           set({ error: "网络错误，请重试", loading: false })
           return false
         }
@@ -83,7 +84,7 @@ export const useAuthStore = create<AuthStore>()(
           localStorage.setItem(TOKEN_KEY, ghostToken)
           localStorage.setItem(USER_KEY, JSON.stringify(ghostUser))
         } catch (storageError) {
-          console.warn("⚠️ [AuthStore] Ghost mode localStorage write failed:", storageError)
+          logger.warn('AuthStore', 'Ghost mode localStorage write failed', { error: storageError })
         }
 
         set({
@@ -93,10 +94,8 @@ export const useAuthStore = create<AuthStore>()(
           error: null,
         })
 
-        console.log('👻 Ghost Mode Login Successful!')
-        console.log('📝 User:', ghostUser.name)
-        console.log('🔑 Role:', ghostUser.role)
-        console.log('⚠️  This is development mode only!')
+        logger.info('AuthStore', 'Ghost Mode Login Successful', { user: ghostUser.name, role: ghostUser.role })
+        logger.warn('AuthStore', 'Development mode only - not for production')
       },
 
       logout: () => {
@@ -104,7 +103,7 @@ export const useAuthStore = create<AuthStore>()(
           localStorage.removeItem(TOKEN_KEY)
           localStorage.removeItem(USER_KEY)
         } catch (storageError) {
-          console.warn("⚠️ [AuthStore] localStorage remove failed:", storageError)
+          logger.warn('AuthStore', 'localStorage remove failed', { error: storageError })
         }
         set({ user: null, token: null, isAuthenticated: false })
       },
@@ -118,7 +117,7 @@ export const useAuthStore = create<AuthStore>()(
             set({ user, token, isAuthenticated: true })
           }
         } catch (err) {
-          console.error("❌ [AuthStore] loadFromStorage failed:", err)
+          logger.error('AuthStore', 'loadFromStorage failed', err)
           set({ user: null, token: null, isAuthenticated: false })
         }
       },
@@ -130,7 +129,7 @@ export const useAuthStore = create<AuthStore>()(
           localStorage.removeItem(TOKEN_KEY)
           localStorage.removeItem(USER_KEY)
         } catch (storageError) {
-          console.warn("⚠️ [AuthStore] Reset cleanup failed:", storageError)
+          logger.warn('AuthStore', 'Reset cleanup failed', { error: storageError })
         }
         set({
           user: null,

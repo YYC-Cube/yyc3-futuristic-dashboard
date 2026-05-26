@@ -56,6 +56,35 @@ class Logger {
     return level >= this.logLevel
   }
 
+  private sendToSentry(level: LogLevel, entry: LogEntry): void {
+    if (typeof window !== 'undefined' && window.Sentry) {
+      const sentryLevel = {
+        [LogLevel.DEBUG]: 'debug' as const,
+        [LogLevel.INFO]: 'info' as const,
+        [LogLevel.WARN]: 'warning' as const,
+        [LogLevel.ERROR]: 'error' as const,
+      }
+
+      const context = {
+        tags: {
+          module: entry.module,
+          environment: process.env.NODE_ENV,
+        },
+        extra: {
+          timestamp: entry.timestamp,
+          ...entry.data,
+        },
+        level: sentryLevel[level],
+      }
+
+      if (entry.error) {
+        window.Sentry.captureException(entry.error, context)
+      } else {
+        window.Sentry.captureMessage(entry.message, context)
+      }
+    }
+  }
+
   debug(module: string, message: string, data?: Record<string, unknown>): void {
     if (!this.shouldLog(LogLevel.DEBUG)) return
 
@@ -68,6 +97,10 @@ class Logger {
     }
 
     console.debug(this.formatMessage(entry))
+    
+    if (this.isProduction) {
+      this.sendToSentry(LogLevel.DEBUG, entry)
+    }
   }
 
   info(module: string, message: string, data?: Record<string, unknown>): void {
@@ -82,6 +115,10 @@ class Logger {
     }
 
     console.info(this.formatMessage(entry))
+    
+    if (this.isProduction) {
+      this.sendToSentry(LogLevel.INFO, entry)
+    }
   }
 
   warn(module: string, message: string, data?: Record<string, unknown>): void {
@@ -96,6 +133,10 @@ class Logger {
     }
 
     console.warn(this.formatMessage(entry))
+    
+    if (this.isProduction) {
+      this.sendToSentry(LogLevel.WARN, entry)
+    }
   }
 
   error(module: string, message: string, error?: Error | unknown, data?: Record<string, unknown>): void {
@@ -113,6 +154,10 @@ class Logger {
     }
 
     console.error(this.formatMessage(entry))
+    
+    if (this.isProduction) {
+      this.sendToSentry(LogLevel.ERROR, entry)
+    }
   }
 }
 

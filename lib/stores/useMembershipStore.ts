@@ -2,6 +2,7 @@
 
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
+import logger from '../logger'
 
 export interface MemberTier {
   id: string
@@ -153,7 +154,7 @@ export const useMembershipStore = create<MembershipStore>()(
         try {
           // TODO: Replace with actual API call
           await new Promise(resolve => setTimeout(resolve, 600))
-          console.log('📦 [Membership] Members fetched successfully')
+          logger.info('Membership', 'Members fetched successfully')
           set({ 
             members: getMockMembers(),
             transactions: getMockTransactions(),
@@ -162,7 +163,7 @@ export const useMembershipStore = create<MembershipStore>()(
             lastFetched: now 
           })
         } catch (err) {
-          console.error('❌ [Membership] Fetch members failed:', err)
+          logger.error('Membership', 'Fetch members failed', err)
           set({ 
             error: "获取会员列表失败", 
             loading: false,
@@ -184,7 +185,7 @@ export const useMembershipStore = create<MembershipStore>()(
             set({ error: "未找到该会员", loading: false })
           }
         } catch (err) {
-          console.error('❌ [Membership] Fetch member failed:', err)
+          logger.error('Membership', 'Fetch member failed', err)
           set({ error: "获取会员信息失败", loading: false })
         }
       },
@@ -212,7 +213,7 @@ export const useMembershipStore = create<MembershipStore>()(
           console.log(`✅ [Membership] Member created: ${newMember.name}`)
           return newMember
         } catch (err) {
-          console.error('❌ [Membership] Create member failed:', err)
+          logger.error('Membership', 'Create member failed', err)
           set({ error: "创建会员失败", loading: false })
           throw err
         }
@@ -234,7 +235,7 @@ export const useMembershipStore = create<MembershipStore>()(
           }))
           console.log(`✅ [Membership] Member updated: ${memberId}`)
         } catch (err) {
-          console.error('❌ [Membership] Update member failed:', err)
+          logger.error('Membership', 'Update member failed', err)
           set({ error: "更新会员信息失败", loading: false })
           throw err
         }
@@ -250,7 +251,7 @@ export const useMembershipStore = create<MembershipStore>()(
           }))
           console.log(`✅ [Membership] Member deleted: ${memberId}`)
         } catch (err) {
-          console.error('❌ [Membership] Delete member failed:', err)
+          logger.error('Membership', 'Delete member failed', err)
           set({ error: "删除会员失败", loading: false })
           throw err
         }
@@ -270,7 +271,7 @@ export const useMembershipStore = create<MembershipStore>()(
       addPoints: async (memberId, points, type, description, metadata?: Record<string, unknown>) => {
         const member = get().members.find(m => m.id === memberId)
         if (!member) {
-          console.error(`❌ [Membership] Member ${memberId} not found`)
+          logger.warn('Membership', 'Member not found', { memberId })
           return
         }
 

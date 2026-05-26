@@ -2,6 +2,7 @@ import { create } from "zustand"
 import { devtools } from "zustand/middleware"
 import { roomService } from "../services"
 import type { Room } from "../api/types"
+import logger from "../logger"
 
 const EMPTY_ROOMS: Room[] = []
 
@@ -65,7 +66,7 @@ export const useRoomStore = create<RoomStore>()(
           const rooms = await roomService.getRooms()
           set({ rooms: rooms ?? EMPTY_ROOMS, loading: false, lastFetched: now })
         } catch (err) {
-          console.error("❌ [RoomStore] Fetch rooms failed:", err)
+          logger.error('RoomStore', 'Fetch rooms failed', err)
           set({ 
             error: "获取包厢信息失败", 
             loading: false,
@@ -91,7 +92,7 @@ export const useRoomStore = create<RoomStore>()(
             )
             set({ rooms: updatedRooms, lastFetched: null })
         } catch (err) {
-          console.error("❌ [RoomStore] Update room status failed:", err)
+          logger.error('RoomStore', 'Update room status failed', err)
           set({ rooms: prevRooms, error: "更新包厢状态失败" })
         }
       },
@@ -102,7 +103,7 @@ export const useRoomStore = create<RoomStore>()(
           set({ lastFetched: null })
           await get().fetchRooms()
         } catch (err) {
-          console.error("❌ [RoomStore] Start room failed:", err)
+          logger.error('RoomStore', 'Start room failed', err)
           set({ error: "开房失败" })
         }
       },
@@ -113,7 +114,7 @@ export const useRoomStore = create<RoomStore>()(
           set({ lastFetched: null })
           await get().fetchRooms()
         } catch (err) {
-          console.error("❌ [RoomStore] Checkout room failed:", err)
+          logger.error('RoomStore', 'Checkout room failed', err)
           set({ error: "结账失败" })
         }
       },

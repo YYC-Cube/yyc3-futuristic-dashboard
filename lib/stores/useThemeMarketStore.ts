@@ -2,6 +2,7 @@
 
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import logger from '../logger'
 
 export interface CommunityTheme {
   id: string
@@ -298,10 +299,10 @@ export const useThemeMarketStore = create<ThemeMarketStore>()(
         try {
           // 模拟API调用
           await new Promise(resolve => setTimeout(resolve, 500))
-          console.log('📦 [ThemeMarket] Themes fetched successfully')
+          logger.info('ThemeMarket', 'Themes fetched successfully')
           set({ loading: false })
         } catch (err) {
-          console.error('❌ [ThemeMarket] Fetch themes failed:', err)
+          logger.error('ThemeMarket', 'Fetch themes failed', err)
           set({ error: "获取主题列表失败", loading: false, themes: EMPTY_THEMES })
         }
       },

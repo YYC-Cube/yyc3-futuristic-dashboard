@@ -78,6 +78,8 @@
     "zustand": "latest"
   },
   "devDependencies": {
+    "@commitlint/cli": "^21.0.1",
+    "@commitlint/config-conventional": "^21.0.1",
     "@eslint/eslintrc": "^3.3.5",
     "@playwright/test": "^1.60.0",
     "@storybook/addon-essentials": "^8.6.14",
